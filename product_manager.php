@@ -1,6 +1,26 @@
 <?php
 include 'connect.php'; // Kết nối với cơ sở dữ liệu
 
+// Hàm xóa sản phẩm
+if (isset($_GET['delete'])) {
+    $fabric_type_id = $_GET['delete'];
+
+    try {
+        // Xóa sản phẩm trong bảng fabric_types (các bản ghi trong fabric_rolls sẽ bị xóa tự động nếu đã cấu hình cascade delete)
+        $sql = "DELETE FROM fabric_types WHERE fabric_type_id = :fabric_type_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':fabric_type_id' => $fabric_type_id]);
+
+        // Sau khi xóa thành công, chuyển hướng về danh sách sản phẩm
+        header('Location: product_manager.php');
+        exit; // Đảm bảo mã dừng lại ở đây sau khi thực hiện chuyển hướng
+
+    } catch (PDOException $e) {
+        // Nếu có lỗi, hiển thị thông báo lỗi
+        echo "Error: " . $e->getMessage(); // Hiển thị lỗi chi tiết
+    }
+}
+
 // Hàm thêm sản phẩm
 if (isset($_POST['add'])) {
     $name = $_POST['name'];
@@ -36,18 +56,6 @@ if (isset($_POST['add'])) {
 
 include 'nav.php';
 
-// Hàm xóa sản phẩm
-if (isset($_GET['delete'])) {
-    $fabric_type_id = $_GET['delete'];
-    $sql = "DELETE FROM fabric_types WHERE fabric_type_id = :fabric_type_id";
-    $stmt = $conn->prepare($sql);
-    $stmt->execute([':fabric_type_id' => $fabric_type_id]);
-
-    // Quay lại trang danh sách sản phẩm sau khi xóa
-    header('Location: product_manager.php');
-    exit;
-}
-
 // Hàm sửa sản phẩm
 if (isset($_GET['edit'])) {
     $fabric_type_id = $_GET['edit'];
@@ -73,6 +81,7 @@ $products = $stmt->fetchAll();
     <title>Quản lý sản phẩm</title>
     
     <style>
+        /* Các kiểu dáng CSS cho giao diện */
         body {
             font-family: 'Arial', sans-serif;
             background-color: #f4f7fc;
