@@ -1,19 +1,25 @@
 <?php
-include "connect.php"; // Đảm bảo kết nối cơ sở dữ liệu
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+include "connect.php"; // Ensure database connection
 include "nav.php";
+
 try {
-    // Tính tổng doanh thu của các đơn hàng đã thanh toán
+    // Calculate total revenue from paid orders
     $stmt = $conn->prepare("SELECT SUM(total_amount) as total_revenue FROM orders WHERE status = 'paid'");
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     $totalRevenue = $result['total_revenue'] ?? 0;
 } catch (PDOException $e) {
-    echo "Lỗi khi truy vấn dữ liệu: " . $e->getMessage();
+    echo "Error querying data: " . $e->getMessage();
     $totalRevenue = 0;
 }
-
-// Đoạn mã HTML hiển thị tổng doanh thu
 ?>
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -22,6 +28,7 @@ try {
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* Styling for the statistics page */
         body {
             font-family: Arial, sans-serif;
             background: #f0f2f5;
@@ -56,9 +63,7 @@ try {
             padding: 10px;
             border-radius: 8px;
             border: 1px solid #ddd;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
             transition: border-color 0.3s;
-            outline: none;
         }
         .filter-form input[type="date"]:focus {
             border-color: #007bff;
@@ -117,8 +122,8 @@ try {
         <h1>Thống Kê Doanh Thu Bán Hàng</h1>
 
         <div class="total-revenue" id="totalRevenue">
-        <span style="color: #28a745; font-size: 24px;">Tổng doanh thu: $<?php echo number_format($totalRevenue, 2); ?></span>
-</div>
+            <span style="color: #28a745; font-size: 24px;">Tổng doanh thu: $<?php echo number_format($totalRevenue, 2); ?></span>
+        </div>
 
         <!-- Form chọn ngày -->
         <form id="filterForm" class="filter-form">
@@ -132,33 +137,29 @@ try {
             </div>
         </form>
 
-        <!-- Biểu đồ doanh thu theo tháng -->
+        <!-- Chart containers for different types of revenue -->
         <div class="chart-container">
             <h2 style="margin-bottom: 10px;">Doanh Thu Theo Tháng</h2>
             <canvas id="monthlyRevenueChart"></canvas>
         </div>
-
-        <!-- Biểu đồ doanh thu theo loại vải -->
         <div class="chart-container">
             <h2 style="margin-bottom: 10px;">Doanh Thu Theo Loại Vải</h2>
             <canvas id="fabricRevenueChart"></canvas>
         </div>
-
-        <!-- Biểu đồ doanh thu theo khách hàng -->
         <div class="chart-container">
             <h2 style="margin-bottom: 10px;">Doanh Thu Theo Khách Hàng</h2>
             <canvas id="customerRevenueChart"></canvas>
         </div>
         
-        <!-- Thông báo nếu không có dữ liệu -->
+        <!-- Notification if there is no data -->
         <div id="noDataMessage" class="message" style="display: none;">Không có dữ liệu cho ngày đã chọn.</div>
     </div>
 
     <script>
         let monthlyRevenueChart, fabricRevenueChart, customerRevenueChart;
 
+        // Function to render charts based on data
         function renderCharts(data) {
-            const totalRevenue = data.total_revenue || 0;
             document.getElementById('noDataMessage').style.display = data.has_data ? 'none' : 'block';
 
             const monthlyLabels = data.monthly_revenue.map(item => item.month);
@@ -179,9 +180,7 @@ try {
                 },
                 options: {
                     responsive: true,
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
+                    scales: { y: { beginAtZero: true } }
                 }
             });
 
@@ -203,9 +202,7 @@ try {
                 },
                 options: {
                     responsive: true,
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
+                    scales: { y: { beginAtZero: true } }
                 }
             });
 
@@ -230,12 +227,11 @@ try {
                         ]
                     }]
                 },
-                options: {
-                    responsive: true
-                }
+                options: { responsive: true }
             });
         }
 
+        // Fetch data and render charts
         function filterData(date = '') {
             fetch(`get_sales_data.php?date=${date}`)
                 .then(response => response.json())
@@ -243,6 +239,7 @@ try {
                 .catch(error => console.error('Error loading data:', error));
         }
 
+        // Set quick filter based on period
         function setQuickFilter(period) {
             const dateInput = document.getElementById('date');
             const today = new Date();
@@ -267,7 +264,7 @@ try {
         }
 
         document.getElementById('date').addEventListener('change', () => filterData(document.getElementById('date').value));
-        filterData(); // Tải dữ liệu lần đầu
+        filterData(); // Initial data load
     </script>
 </body>
 </html>
