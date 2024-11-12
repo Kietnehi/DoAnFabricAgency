@@ -5,8 +5,8 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-require 'connect.php';
 include "nav.php";
+require 'connect.php';
 
 // Xử lý lọc thời gian
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : null;

@@ -7,12 +7,18 @@ if (!isset($_SESSION['user_id'])) {
 
 require 'connect.php'; // Kết nối cơ sở dữ liệu
 include 'nav.php'; // Bao gồm thanh điều hướng
+
 // Xử lý tìm kiếm và sắp xếp
 $query = isset($_GET['query']) ? $_GET['query'] : '';
 $order_by = isset($_GET['order_by']) ? $_GET['order_by'] : 'order_id';
 $order_dir = isset($_GET['order_dir']) && $_GET['order_dir'] === 'desc' ? 'desc' : 'asc';
 
-// Truy vấn SQL tìm kiếm và sắp xếp
+// Thiết lập phân trang
+$limit = 10; // Số bản ghi trên mỗi trang
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
+
+// Truy vấn SQL tìm kiếm và sắp xếp có phân trang
 $sql = "SELECT Orders.*, 
                Customers.first_name, Customers.last_name, 
                Employees.first_name AS emp_first_name, Employees.last_name AS emp_last_name 
@@ -20,10 +26,20 @@ $sql = "SELECT Orders.*,
         JOIN Customers ON Orders.customer_id = Customers.customer_id
         JOIN Employees ON Orders.employee_id = Employees.employee_id
         WHERE Customers.first_name LIKE :query OR Customers.last_name LIKE :query 
-        ORDER BY $order_by $order_dir";
+        ORDER BY $order_by $order_dir
+        LIMIT :limit OFFSET :offset";
 $stmt = $conn->prepare($sql);
-$stmt->execute(['query' => "%$query%"]);
+$stmt->bindValue(':query', "%$query%", PDO::PARAM_STR);
+$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Đếm tổng số bản ghi để tính tổng số trang
+$total_stmt = $conn->prepare("SELECT COUNT(*) FROM Orders JOIN Customers ON Orders.customer_id = Customers.customer_id WHERE Customers.first_name LIKE :query OR Customers.last_name LIKE :query");
+$total_stmt->execute([':query' => "%$query%"]);
+$total_rows = $total_stmt->fetchColumn();
+$total_pages = ceil($total_rows / $limit);
 
 // Đảo chiều sắp xếp
 $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
@@ -105,18 +121,6 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
             background-color: #333;
             color: white;
             cursor: pointer;
-            position: relative;
-        }
-
-        th a.sortable {
-            color: white;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-        }
-
-        th a.sortable:hover {
-            text-decoration: underline;
         }
 
         tr:nth-child(even) {
@@ -136,16 +140,36 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
             background-color: #4CAF50;
         }
 
-        .edit-btn:hover {
-            background-color: #45a049;
-        }
-
         .delete-btn {
             background-color: #f44336;
         }
 
-        .delete-btn:hover {
-            background-color: #d32f2f;
+        /* Style cho phân trang */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            color: #333;
+            padding: 8px 12px;
+            margin: 0 4px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .pagination a:hover {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .pagination a.active {
+            background-color: #007bff;
+            color: white;
+            border: 1px solid #007bff;
         }
     </style>
 </head>
@@ -164,12 +188,12 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
         <!-- Bảng hiển thị danh sách đơn hàng -->
         <table>
             <tr>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=order_id&order_dir=<?= $new_order_dir ?>" class="sortable">ID</a></th>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=first_name&order_dir=<?= $new_order_dir ?>" class="sortable">Khách Hàng</a></th>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=emp_first_name&order_dir=<?= $new_order_dir ?>" class="sortable">Nhân Viên</a></th>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=order_date&order_dir=<?= $new_order_dir ?>" class="sortable">Ngày Đặt</a></th>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=total_amount&order_dir=<?= $new_order_dir ?>" class="sortable">Tổng Tiền</a></th>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=status&order_dir=<?= $new_order_dir ?>" class="sortable">Trạng Thái</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=order_id&order_dir=<?= $new_order_dir ?>">ID</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=first_name&order_dir=<?= $new_order_dir ?>">Khách Hàng</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=emp_first_name&order_dir=<?= $new_order_dir ?>">Nhân Viên</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=order_date&order_dir=<?= $new_order_dir ?>">Ngày Đặt</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=total_amount&order_dir=<?= $new_order_dir ?>">Tổng Tiền</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=status&order_dir=<?= $new_order_dir ?>">Trạng Thái</a></th>
                 <th>Hành động</th>
             </tr>
             <?php if (!empty($orders)): ?>
@@ -193,6 +217,13 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
                 </tr>
             <?php endif; ?>
         </table>
+
+        <!-- Hiển thị phân trang -->
+        <div class="pagination">
+            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                <a href="?query=<?= htmlspecialchars($query) ?>&order_by=<?= htmlspecialchars($order_by) ?>&order_dir=<?= htmlspecialchars($order_dir) ?>&page=<?= $i ?>" class="<?= ($i == $page) ? 'active' : '' ?>"><?= $i ?></a>
+            <?php endfor; ?>
+        </div>
     </div>
 </body>
 </html>
