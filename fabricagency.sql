@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 09, 2024 lúc 09:46 AM
+-- Thời gian đã tạo: Th10 13, 2024 lúc 04:20 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -44,19 +44,11 @@ CREATE TABLE `customers` (
 --
 
 INSERT INTO `customers` (`customer_id`, `first_name`, `last_name`, `address`, `phone`, `outstanding_balance`, `warning_status`, `bad_debt_status`, `warning_start_date`) VALUES
-(1, 'John', 'Doe', '789 Oak St', '0123456780', -110611.00, 0, 0, NULL),
+(1, 'John', 'Doe', '789 Oak St', '0123456780', 2000000.00, 1, 0, '2024-11-12'),
 (2, 'Jane', 'Smith', '101 Pine St', '0987654320', 2200.00, 1, 0, '2024-11-08'),
-(3, 'Alice', 'Johnson', '202 Maple St', '0123456781', 1500.00, 0, 0, NULL),
-(4, 'Robert', 'Miller', '104 Maple St', '0678901234', 3500.00, 1, 0, '2024-11-08'),
-(5, 'Linda', 'Garcia', '105 Walnut St', '0789012345', 1200.00, 0, 0, NULL),
-(6, 'James', 'Martinez', '106 Willow St', '0890123456', 500.00, 0, 0, NULL),
-(7, 'Patricia', 'Hernandez', '107 Ash St', '0901234567', 250.00, 0, 0, NULL),
-(8, 'Michael', 'Lopez', '108 Spruce St', '0123456789', 800.00, 0, 0, NULL),
-(9, 'Robert', 'Miller', '104 Maple St', '0678901234', 3500.00, 1, 0, '2024-11-08'),
-(10, 'Linda', 'Garcia', '105 Walnut St', '0789012345', -8800.00, 0, 0, NULL),
-(11, 'James', 'Martinez', '106 Willow St', '0890123456', 500.00, 0, 0, NULL),
-(12, 'Patricia', 'Hernandez', '107 Ash St', '0901234567', 250.00, 0, 0, NULL),
-(13, 'Michael', 'Lopez', '108 Spruce St', '0123456789', 800.00, 0, 0, NULL);
+(3, 'Alice', 'Johnson', '202 Maple St', '0123456781', 21313131.00, 1, 0, '2024-11-13'),
+(6, 'James', 'Martinez', '106 Willow St', '0890123456', 2200.00, 1, 0, '2024-11-13'),
+(7, 'Patricia', 'Hernandez', '107 Ash St', '0901234567', 250.00, 0, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -100,14 +92,10 @@ INSERT INTO `customer_payments` (`payment_id`, `customer_id`, `payment_date`, `a
 (2, 2, '2023-06-10', 1000.00),
 (3, 2, '2023-07-01', 300.00),
 (4, 3, '2023-07-15', 500.00),
-(11, 4, '2023-06-05', 1000.00),
-(12, 5, '2023-06-15', 500.00),
 (13, 6, '2023-07-10', 250.00),
 (14, 7, '2023-07-20', 100.00),
-(15, 8, '2023-08-05', 300.00),
-(16, 9, '2023-08-15', 250.00),
-(17, 10, '2024-11-08', 10000.00),
-(18, 1, '2024-11-08', 111111.00);
+(18, 1, '2024-11-08', 111111.00),
+(19, 1, '2024-11-12', 5000000.00);
 
 -- --------------------------------------------------------
 
@@ -133,7 +121,8 @@ INSERT INTO `employees` (`employee_id`, `first_name`, `last_name`, `gender`, `ad
 (1, 'Michael', 'Brown', 'Nam', '345 Elm St', '0123456782', 'Manager'),
 (2, 'Sarah', 'Wilson', 'Nữ', '456 Birch St', '0987654322', 'Partner'),
 (3, 'David', 'Taylor', 'Nam', '567 Cedar St', '0123456783', 'Operations'),
-(4, 'Emily', 'Clark', 'Nữ', '678 Fir St', '0987654323', 'Office');
+(4, 'Emily', 'Clark', 'Nữ', '678 Fir St', '0987654323', 'Office'),
+(5, '11', '1', 'Nam', '1', '1', 'Operations');
 
 -- --------------------------------------------------------
 
@@ -160,12 +149,7 @@ INSERT INTO `fabric_rolls` (`roll_id`, `fabric_type_id`, `length`) VALUES
 (6, 5, 60.00),
 (7, 5, 50.00),
 (8, 6, 45.50),
-(9, 6, 40.00),
-(10, 7, 48.30),
-(11, 7, 52.50),
-(12, 8, 60.00),
-(13, 9, 55.00),
-(14, 9, 65.00);
+(9, 6, 40.00);
 
 -- --------------------------------------------------------
 
@@ -194,11 +178,7 @@ INSERT INTO `fabric_types` (`fabric_type_id`, `name`, `color`, `current_price`, 
 (3, 'Embroidered', 'Blue', 25.00, '2023-03-01', 150, 2, 'img4.jpg'),
 (4, 'Jacquard', 'Yellow', 30.00, '2023-04-01', 120, 2, 'img5.jpg'),
 (5, 'Polyester', 'Black', 12.00, '2023-05-01', 300, 3, 'img2.jpg'),
-(6, 'Linen', 'White', 18.00, '2023-06-01', 250, 4, 'img6.jpg'),
-(7, 'Wool', 'Gray', 22.00, '2023-07-01', 180, 5, 'img7.jpg'),
-(8, 'Cotton', 'Blue', 10.00, '2023-08-01', 400, 6, 'img8.jpg'),
-(9, 'Denim', 'Indigo', 15.00, '2023-09-01', 350, 1, 'img9.jpg'),
-(27, '1', '1', 1.00, '2024-11-20', 1, 1, 'img1.jpg');
+(6, 'Linen', 'White', 18.00, '2023-06-01', 250, 3, 'img6.jpg');
 
 -- --------------------------------------------------------
 
@@ -224,10 +204,7 @@ INSERT INTO `inventory` (`inventory_id`, `fabric_type_id`, `quantity`, `purchase
 (3, 3, 150, '2023-03-15', 22.00),
 (4, 4, 120, '2023-04-15', 27.50),
 (5, 5, 300, '2023-05-15', 10.00),
-(6, 6, 250, '2023-06-15', 15.00),
-(7, 7, 180, '2023-07-15', 18.50),
-(8, 8, 400, '2023-08-15', 8.00),
-(9, 9, 350, '2023-09-15', 12.50);
+(6, 6, 250, '2023-06-15', 15.00);
 
 -- --------------------------------------------------------
 
@@ -252,12 +229,12 @@ CREATE TABLE `orders` (
 INSERT INTO `orders` (`order_id`, `customer_id`, `employee_id`, `order_date`, `total_amount`, `status`, `cancellation_reason`) VALUES
 (1, 1, 3, '2023-08-01 10:00:00', 500.00, 'paid', NULL),
 (2, 2, 3, '2023-08-15 14:30:00', 1500.00, 'paid', NULL),
-(3, 3, 3, '2023-09-01 16:45:00', 800.00, 'ordered', NULL),
+(3, 3, 3, '2023-09-01 16:45:00', 800.00, 'paid', NULL),
 (4, 1, 1, '2024-11-07 16:04:00', 123.00, 'partial_payment', NULL),
 (7, 1, 1, '2024-11-08 14:47:19', 1200.00, 'new', NULL),
 (8, 1, 1, '2024-11-08 14:50:27', 4392.50, 'new', NULL),
 (10, 1, 1, '2024-11-09 01:19:55', 321.00, 'new', NULL),
-(11, 1, 1, '2024-11-09 06:14:16', 291.00, 'new', NULL);
+(12, 1, 1, '2024-11-12 14:01:00', 358.00, 'paid', NULL);
 
 -- --------------------------------------------------------
 
@@ -482,31 +459,31 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT cho bảng `customers`
 --
 ALTER TABLE `customers`
-  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT cho bảng `customer_payments`
 --
 ALTER TABLE `customer_payments`
-  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT cho bảng `employees`
 --
 ALTER TABLE `employees`
-  MODIFY `employee_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `employee_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT cho bảng `fabric_rolls`
 --
 ALTER TABLE `fabric_rolls`
-  MODIFY `roll_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `roll_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT cho bảng `fabric_types`
 --
 ALTER TABLE `fabric_types`
-  MODIFY `fabric_type_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `fabric_type_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT cho bảng `inventory`
@@ -518,7 +495,7 @@ ALTER TABLE `inventory`
 -- AUTO_INCREMENT cho bảng `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT cho bảng `order_fabric_rolls`
@@ -553,7 +530,7 @@ ALTER TABLE `users`
 --
 ALTER TABLE `customer_care`
   ADD CONSTRAINT `customer_care_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`employee_id`),
-  ADD CONSTRAINT `customer_care_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`);
+  ADD CONSTRAINT `customer_care_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`customer_id`) ON DELETE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `customer_payments`
@@ -565,7 +542,7 @@ ALTER TABLE `customer_payments`
 -- Các ràng buộc cho bảng `fabric_rolls`
 --
 ALTER TABLE `fabric_rolls`
-  ADD CONSTRAINT `fabric_rolls_ibfk_1` FOREIGN KEY (`fabric_type_id`) REFERENCES `fabric_types` (`fabric_type_id`);
+  ADD CONSTRAINT `fabric_rolls_ibfk_1` FOREIGN KEY (`fabric_type_id`) REFERENCES `fabric_types` (`fabric_type_id`) ON DELETE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `fabric_types`
@@ -577,7 +554,7 @@ ALTER TABLE `fabric_types`
 -- Các ràng buộc cho bảng `inventory`
 --
 ALTER TABLE `inventory`
-  ADD CONSTRAINT `inventory_ibfk_1` FOREIGN KEY (`fabric_type_id`) REFERENCES `fabric_types` (`fabric_type_id`);
+  ADD CONSTRAINT `inventory_ibfk_1` FOREIGN KEY (`fabric_type_id`) REFERENCES `fabric_types` (`fabric_type_id`) ON DELETE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `orders`
