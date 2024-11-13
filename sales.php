@@ -1,41 +1,27 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
-?>
-<?php
 require 'connect.php';
-include 'nav.php'; // Bao gồm thanh điều hướng
+
 // Lấy danh sách khách hàng và nhân viên
 $customers = $conn->query("SELECT customer_id, first_name, last_name FROM Customers")->fetchAll(PDO::FETCH_ASSOC);
 $employees = $conn->query("SELECT employee_id, first_name, last_name FROM Employees")->fetchAll(PDO::FETCH_ASSOC);
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $customer_id = $_POST['customer_id'];
-    $employee_id = $_POST['employee_id'];
-    $order_date = date('Y-m-d H:i:s');
-    $total_amount = $_POST['total_amount'];
-    $status = 'new';
-
-    $sql = "INSERT INTO Orders (customer_id, employee_id, order_date, total_amount, status) VALUES (?, ?, ?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->execute([$customer_id, $employee_id, $order_date, $total_amount, $status]);
-
-    header("Location: orders.php");
-}
+// Lấy danh sách các cuộn vải có trong kho
+$fabric_rolls = $conn->query("SELECT Fabric_Rolls.roll_id, Fabric_Types.name AS fabric_name, Fabric_Rolls.length 
+                              FROM Fabric_Rolls 
+                              JOIN Fabric_Types ON Fabric_Rolls.fabric_type_id = Fabric_Types.fabric_type_id")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Thêm Đơn Hàng Mới</title>
+    <title>Tạo Đơn Hàng Mới</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Thêm Đơn Hàng</h1>
-    <form action="add_order.php" method="POST">
+    <h1>Tạo Đơn Hàng Bán Hàng</h1>
+    <form action="process_sale.php" method="POST">
+        <!-- Chọn khách hàng -->
         <label for="customer_id">Khách Hàng:</label>
         <select name="customer_id" required>
             <?php foreach ($customers as $customer): ?>
@@ -45,6 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <?php endforeach; ?>
         </select>
 
+        <!-- Chọn nhân viên bán hàng -->
         <label for="employee_id">Nhân Viên:</label>
         <select name="employee_id" required>
             <?php foreach ($employees as $employee): ?>
@@ -54,10 +41,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <?php endforeach; ?>
         </select>
 
+        <!-- Chọn các cuộn vải -->
+        <h2>Chọn Cuộn Vải</h2>
+        <?php foreach ($fabric_rolls as $roll): ?>
+            <input type="checkbox" name="fabric_rolls[]" value="<?= $roll['roll_id']; ?>">
+            <?= $roll['fabric_name']; ?> - Dài: <?= $roll['length']; ?> mét <br>
+        <?php endforeach; ?>
+
         <label for="total_amount">Tổng Tiền:</label>
         <input type="number" name="total_amount" step="0.01" required>
 
-        <button type="submit">Thêm Đơn Hàng</button>
+        <button type="submit">Tạo Đơn Hàng</button>
     </form>
 </body>
 </html>
