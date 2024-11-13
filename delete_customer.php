@@ -1,4 +1,5 @@
 <?php
+ob_start();
 session_start();
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -15,11 +16,14 @@ if (isset($_GET['id'])) {
         // Begin transaction
         $conn->beginTransaction();
 
-        // Delete related records in customer_payments
+        // Xóa các bản ghi liên quan trong `customer_payments` và `customer_care`
         $stmt = $conn->prepare("DELETE FROM customer_payments WHERE customer_id = ?");
         $stmt->execute([$id]);
 
-        // Delete the customer record
+        $stmt = $conn->prepare("DELETE FROM customer_care WHERE customer_id = ?");
+        $stmt->execute([$id]);
+
+        // Xóa bản ghi trong `customers`
         $stmt = $conn->prepare("DELETE FROM customers WHERE customer_id = ?");
         $stmt->execute([$id]);
 
@@ -34,4 +38,5 @@ if (isset($_GET['id'])) {
         echo "Error: " . $e->getMessage();
     }
 }
+ob_end_flush();
 ?>

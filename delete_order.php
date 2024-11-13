@@ -48,18 +48,88 @@ if (isset($_GET['id'])) {
     <meta charset="UTF-8">
     <title>Xóa Đơn Hàng</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 500px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: #f44336;
+            margin-bottom: 20px;
+        }
+
+        p {
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .error {
+            color: red;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #f44336;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #d32f2f;
+        }
+
+        a.cancel {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #333;
+            padding: 10px 20px;
+            background-color: #ddd;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        a.cancel:hover {
+            background-color: #ccc;
+        }
+    </style>
 </head>
 <body>
-    <h1>Xóa Đơn Hàng</h1>
-    <?php if (isset($error)): ?>
-        <p style="color: red;"><?= $error ?></p>
-        <a href="orders.php">Quay lại danh sách đơn hàng</a>
-    <?php else: ?>
-        <p>Bạn có chắc chắn muốn xóa đơn hàng này không?</p>
-        <form method="POST">
-            <button type="submit" style="background-color: #f44336; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">Xóa Đơn Hàng</button>
-            <a href="orders.php" style="margin-left: 15px; text-decoration: none; color: #333;">Hủy bỏ</a>
-        </form>
-    <?php endif; ?>
+    <div class="container">
+        <h1>Xóa Đơn Hàng</h1>
+        
+        <?php if (isset($error)): ?>
+            <p class="error"><?= $error ?></p>
+            <a href="orders.php" class="cancel">Quay lại danh sách đơn hàng</a>
+        <?php else: ?>
+            <p>Bạn có chắc chắn muốn xóa đơn hàng này không?</p>
+            <form method="POST">
+                <button type="submit">Xóa Đơn Hàng</button>
+                <a href="orders.php" class="cancel">Hủy bỏ</a>
+            </form>
+        <?php endif; ?>
+    </div>
 </body>
 </html>

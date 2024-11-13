@@ -5,8 +5,21 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-require 'connect.php'; // Kết nối cơ sở dữ liệu
+require 'connect.php';
 include 'nav.php'; // Bao gồm thanh điều hướng
+
+// Kiểm tra nếu có yêu cầu xóa đơn hàng
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_order_id'])) {
+    $order_id = $_POST['delete_order_id'];
+
+    // Xóa các dòng liên quan trong Order_Fabric_Rolls và Order_Payments nếu có
+    $conn->prepare("DELETE FROM Order_Fabric_Rolls WHERE order_id = :order_id")->execute(['order_id' => $order_id]);
+    $conn->prepare("DELETE FROM Order_Payments WHERE order_id = :order_id")->execute(['order_id' => $order_id]);
+
+    // Xóa đơn hàng chính
+    $stmt = $conn->prepare("DELETE FROM Orders WHERE order_id = :order_id");
+    $stmt->execute(['order_id' => $order_id]);
+}
 
 // Xử lý tìm kiếm và sắp xếp
 $query = isset($_GET['query']) ? $_GET['query'] : '';
@@ -127,24 +140,40 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
             background-color: #f2f2f2;
         }
 
-        .action-buttons a {
-            padding: 6px 12px;
-            margin: 2px;
+        .action-buttons form {
+            display: inline-block;
+        }
+
+        .action-buttons .edit-btn, .action-buttons .delete-btn {
+            padding: 8px 12px;
             border-radius: 5px;
             text-decoration: none;
             color: white;
-            transition: 0.2s;
+            font-size: 14px;
+            font-weight: bold;
+            display: inline-block;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
-        .edit-btn {
+        .action-buttons .edit-btn {
             background-color: #4CAF50;
         }
 
-        .delete-btn {
+        .action-buttons .delete-btn {
             background-color: #f44336;
+            border: none;
+            cursor: pointer;
         }
 
-        /* Style cho phân trang */
+        .action-buttons .edit-btn:hover, .action-buttons .delete-btn:hover {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+
+        .action-buttons .delete-btn:active {
+            transform: scale(0.95);
+        }
+
         .pagination {
             display: flex;
             justify-content: center;
@@ -177,7 +206,6 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
     <div class="container">
         <h1>Danh Sách Đơn Hàng</h1>
 
-        <!-- Form tìm kiếm đơn hàng -->
         <form method="GET" action="orders.php" class="search-bar">
             <input type="text" name="query" placeholder="Tìm kiếm theo tên khách hàng..." value="<?= htmlspecialchars($query) ?>">
             <button type="submit">Tìm kiếm</button>
@@ -185,7 +213,6 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
             <input type="hidden" name="order_dir" value="<?= htmlspecialchars($order_dir) ?>">
         </form>
 
-        <!-- Bảng hiển thị danh sách đơn hàng -->
         <table>
             <tr>
                 <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=order_id&order_dir=<?= $new_order_dir ?>">ID</a></th>
@@ -207,7 +234,10 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
                         <td><?= htmlspecialchars($order['status']); ?></td>
                         <td class="action-buttons">
                             <a href="edit_order.php?id=<?= $order['order_id']; ?>" class="edit-btn">Sửa</a>
-                            <a href="delete_order.php?id=<?= $order['order_id']; ?>" class="delete-btn" onclick="return confirm('Bạn có chắc chắn muốn xóa?');">Xóa</a>
+                            <form method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa đơn hàng này?');">
+                                <input type="hidden" name="delete_order_id" value="<?= $order['order_id']; ?>">
+                                <button type="submit" class="delete-btn">Xóa</button>
+                            </form>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -218,7 +248,6 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
             <?php endif; ?>
         </table>
 
-        <!-- Hiển thị phân trang -->
         <div class="pagination">
             <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                 <a href="?query=<?= htmlspecialchars($query) ?>&order_by=<?= htmlspecialchars($order_by) ?>&order_dir=<?= htmlspecialchars($order_dir) ?>&page=<?= $i ?>" class="<?= ($i == $page) ? 'active' : '' ?>"><?= $i ?></a>

@@ -1,8 +1,16 @@
 <?php
-include 'connect.php'; // Kết nối với cơ sở dữ liệu
-include "nav.php";
+ob_start(); // Bắt đầu bộ đệm output để tránh lỗi header
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+require 'connect.php';
+include 'nav.php'; // Bao gồm thanh điều hướng
 
 // Kiểm tra xem có tham số 'edit' trong URL hay không
+$product = null;
 if (isset($_GET['edit'])) {
     $fabric_type_id = $_GET['edit'];
 
@@ -10,7 +18,21 @@ if (isset($_GET['edit'])) {
     $sql = "SELECT * FROM fabric_types WHERE fabric_type_id = :fabric_type_id";
     $stmt = $conn->prepare($sql);
     $stmt->execute([':fabric_type_id' => $fabric_type_id]);
-    $product = $stmt->fetch();
+    $product = $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+// Nếu không tìm thấy sản phẩm, tạo giá trị mặc định cho $product để tránh lỗi undefined variable
+if (!$product) {
+    $product = [
+        'fabric_type_id' => '',
+        'name' => '',
+        'color' => '',
+        'current_price' => '',
+        'price_effective_date' => '',
+        'quantity' => '',
+        'supplier_id' => '',
+        'image' => ''
+    ];
 }
 
 // Cập nhật sản phẩm
@@ -36,7 +58,7 @@ if (isset($_POST['update'])) {
         $imageBase64 = $imageName;
     } else {
         // Nếu không có hình ảnh mới, giữ nguyên hình ảnh cũ
-        $imageBase64 = $product['image']; 
+        $imageBase64 = $product['image'];
     }
 
     // Cập nhật thông tin sản phẩm trong cơ sở dữ liệu
@@ -57,8 +79,9 @@ if (isset($_POST['update'])) {
 
     // Chuyển hướng về trang danh sách sản phẩm sau khi cập nhật
     header('Location: product_manager.php');
-    exit;
+    exit();
 }
+ob_end_flush(); // Kết thúc bộ đệm output
 ?>
 
 <!DOCTYPE html>
@@ -166,32 +189,32 @@ if (isset($_POST['update'])) {
 <h1>Sửa sản phẩm</h1>
 
 <form action="edit_product.php" method="POST" enctype="multipart/form-data">
-    <input type="hidden" name="fabric_type_id" value="<?php echo $product['fabric_type_id']; ?>">
+    <input type="hidden" name="fabric_type_id" value="<?php echo htmlspecialchars($product['fabric_type_id']); ?>">
 
     <label for="name">Tên sản phẩm:</label>
-    <input type="text" id="name" name="name" value="<?php echo $product['name']; ?>" required><br>
+    <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($product['name']); ?>" required><br>
 
     <label for="color">Màu sắc:</label>
-    <input type="text" id="color" name="color" value="<?php echo $product['color']; ?>" required><br>
+    <input type="text" id="color" name="color" value="<?php echo htmlspecialchars($product['color']); ?>" required><br>
 
     <label for="current_price">Giá hiện tại:</label>
-    <input type="number" id="current_price" name="current_price" value="<?php echo $product['current_price']; ?>" required><br>
+    <input type="number" id="current_price" name="current_price" value="<?php echo htmlspecialchars($product['current_price']); ?>" required><br>
 
     <label for="price_effective_date">Ngày hiệu lực:</label>
-    <input type="date" id="price_effective_date" name="price_effective_date" value="<?php echo $product['price_effective_date']; ?>" required><br>
+    <input type="date" id="price_effective_date" name="price_effective_date" value="<?php echo htmlspecialchars($product['price_effective_date']); ?>" required><br>
 
     <label for="quantity">Số lượng:</label>
-    <input type="number" id="quantity" name="quantity" value="<?php echo $product['quantity']; ?>" required><br>
+    <input type="number" id="quantity" name="quantity" value="<?php echo htmlspecialchars($product['quantity']); ?>" required><br>
 
     <label for="supplier_id">Nhà cung cấp:</label>
-    <input type="text" id="supplier_id" name="supplier_id" value="<?php echo $product['supplier_id']; ?>" required><br>
+    <input type="text" id="supplier_id" name="supplier_id" value="<?php echo htmlspecialchars($product['supplier_id']); ?>" required><br>
 
     <label for="image">Hình ảnh:</label>
     <!-- Hiển thị hình ảnh cũ nếu có -->
     <?php if ($product['image']): ?>
         <div class="image-preview">
             <p>Hình ảnh cũ:</p>
-            <img src="img/<?php echo $product['image']; ?>" alt="Hình ảnh cũ">
+            <img src="img/<?php echo htmlspecialchars($product['image']); ?>" alt="Hình ảnh cũ">
         </div>
     <?php else: ?>
         <p>Chưa có hình ảnh</p>

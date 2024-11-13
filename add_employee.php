@@ -1,4 +1,5 @@
 <?php
+ob_start();
 session_start();
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -24,6 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     header("Location: employees.php"); // Chuyển hướng về trang danh sách nhân viên
     exit();
 }
+ob_end_flush();
 ?>
 
 <!DOCTYPE html>

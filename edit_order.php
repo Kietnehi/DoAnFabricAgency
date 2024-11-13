@@ -1,4 +1,5 @@
 <?php
+ob_start();
 session_start();
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -36,6 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     header("Location: orders.php");
     exit();
 }
+ob_end_flush(); 
 ?>
 
 <!DOCTYPE html>

@@ -1,11 +1,13 @@
 <?php
+ob_start();
 session_start();
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
-require 'connect.php'; // Kết nối cơ sở dữ liệu
-include 'nav.php'; // Bao gồm thanh điều hướng
+
+require 'connect.php';
+include 'nav.php';
 
 // Lấy `customer_id` từ URL
 $customer_id = $_GET['id'];
@@ -49,7 +51,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     header("Location: customers.php");
     exit();
 }
+ob_end_flush();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="vi">
