@@ -6,18 +6,37 @@ if (isset($_GET['delete'])) {
     $fabric_type_id = $_GET['delete'];
 
     try {
-        // Xóa sản phẩm trong bảng fabric_types (các bản ghi trong fabric_rolls sẽ bị xóa tự động nếu đã cấu hình cascade delete)
+        // Bắt đầu giao dịch
+        $conn->beginTransaction();
+
+        // Xóa các bản ghi trong `order_fabric_rolls` liên quan đến `fabric_rolls` có `fabric_type_id` tương ứng
+        $sql = "DELETE order_fabric_rolls FROM order_fabric_rolls 
+                INNER JOIN fabric_rolls ON order_fabric_rolls.roll_id = fabric_rolls.roll_id 
+                WHERE fabric_rolls.fabric_type_id = :fabric_type_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':fabric_type_id' => $fabric_type_id]);
+
+        // Xóa các bản ghi trong `fabric_rolls` liên quan đến `fabric_type_id`
+        $sql = "DELETE FROM fabric_rolls WHERE fabric_type_id = :fabric_type_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':fabric_type_id' => $fabric_type_id]);
+
+        // Xóa sản phẩm trong bảng `fabric_types`
         $sql = "DELETE FROM fabric_types WHERE fabric_type_id = :fabric_type_id";
         $stmt = $conn->prepare($sql);
         $stmt->execute([':fabric_type_id' => $fabric_type_id]);
 
-        // Sau khi xóa thành công, chuyển hướng về danh sách sản phẩm
+        // Xác nhận giao dịch
+        $conn->commit();
+
+        // Chuyển hướng sau khi xóa thành công
         header('Location: product_manager.php');
-        exit; // Đảm bảo mã dừng lại ở đây sau khi thực hiện chuyển hướng
+        exit;
 
     } catch (PDOException $e) {
-        // Nếu có lỗi, hiển thị thông báo lỗi
-        echo "Error: " . $e->getMessage(); // Hiển thị lỗi chi tiết
+        // Hủy giao dịch nếu có lỗi
+        $conn->rollBack();
+        echo "Error: " . $e->getMessage();
     }
 }
 
@@ -30,13 +49,12 @@ if (isset($_POST['add'])) {
     $quantity = $_POST['quantity'];
     $supplier_id = $_POST['supplier_id'];
     
-    // Kiểm tra và xử lý hình ảnh (chuyển hình ảnh thành base64)
+    // Xử lý hình ảnh (chuyển hình ảnh thành base64)
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-        // Đọc file hình ảnh và chuyển nó thành base64
         $imageData = file_get_contents($_FILES['image']['tmp_name']);
-        $imageBase64 = base64_encode($imageData); // Chuyển đổi thành base64
+        $imageBase64 = base64_encode($imageData);
     } else {
-        $imageBase64 = null; // Nếu không có hình ảnh, để null
+        $imageBase64 = null;
     }
 
     // Thêm sản phẩm mới vào cơ sở dữ liệu
@@ -59,7 +77,6 @@ include 'nav.php';
 // Hàm sửa sản phẩm
 if (isset($_GET['edit'])) {
     $fabric_type_id = $_GET['edit'];
-    // Lấy thông tin sản phẩm từ DB
     $sql = "SELECT * FROM fabric_types WHERE fabric_type_id = :fabric_type_id";
     $stmt = $conn->prepare($sql);
     $stmt->execute([':fabric_type_id' => $fabric_type_id]);

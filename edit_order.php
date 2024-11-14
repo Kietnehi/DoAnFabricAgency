@@ -5,9 +5,10 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
-?><?php
+
 require 'connect.php';
 include 'nav.php'; // Bao gồm thanh điều hướng
+
 // Lấy `order_id` từ URL
 $order_id = $_GET['id'];
 
@@ -20,6 +21,11 @@ $order = $stmt->fetch(PDO::FETCH_ASSOC);
 $customers = $conn->query("SELECT customer_id, first_name, last_name FROM Customers")->fetchAll(PDO::FETCH_ASSOC);
 $employees = $conn->query("SELECT employee_id, first_name, last_name FROM Employees")->fetchAll(PDO::FETCH_ASSOC);
 
+// Lấy tổng số tiền đã thanh toán cho đơn hàng này
+$paid_stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM Order_Payments WHERE order_id = ?");
+$paid_stmt->execute([$order_id]);
+$total_paid = $paid_stmt->fetchColumn();
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Lấy dữ liệu từ biểu mẫu
     $customer_id = $_POST['customer_id'];
@@ -28,14 +34,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $total_amount = $_POST['total_amount'];
     $status = $_POST['status'];
 
-    // Cập nhật thông tin đơn hàng
-    $sql = "UPDATE Orders SET customer_id = ?, employee_id = ?, order_date = ?, total_amount = ?, status = ? WHERE order_id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->execute([$customer_id, $employee_id, $order_date, $total_amount, $status, $order_id]);
+    // Kiểm tra nếu trạng thái là "paid" và tổng số tiền chưa được thanh toán đủ
+    if ($status === 'paid' && $total_paid < $total_amount) {
+        echo "<script>alert('Bạn phải thanh toán đủ số tiền mới có thể sửa trạng thái thành Paid.');</script>";
+    } else {
+        // Cập nhật thông tin đơn hàng
+        $sql = "UPDATE Orders SET customer_id = ?, employee_id = ?, order_date = ?, total_amount = ?, status = ? WHERE order_id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$customer_id, $employee_id, $order_date, $total_amount, $status, $order_id]);
 
-    // Quay lại trang danh sách đơn hàng
-    header("Location: orders.php");
-    exit();
+        // Quay lại trang danh sách đơn hàng
+        header("Location: orders.php");
+        exit();
+    }
 }
 ob_end_flush(); 
 ?>

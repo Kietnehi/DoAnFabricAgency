@@ -46,9 +46,6 @@ $monthly_revenue_query .= " GROUP BY month ORDER BY month";
 
 $monthly_revenue = $conn->query($monthly_revenue_query)->fetchAll(PDO::FETCH_ASSOC);
 
-// Kiểm tra kết quả truy vấn
-
-
 $monthly_labels = [];
 $monthly_data = [];
 foreach ($monthly_revenue as $row) {
@@ -56,67 +53,7 @@ foreach ($monthly_revenue as $row) {
     $monthly_data[] = $row['revenue'];
 }
 
-
-?>
-
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>Quản lý Fabric Agency - Bảng Điều Khiển</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        /* Custom styles */
-        body { font-family: Arial, sans-serif; background: #f9f9fb; margin: 0; padding: 0; }
-        .container { max-width: 1200px; margin: 20px auto; }
-        .stat-card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); display: flex; align-items: center; margin-bottom: 20px; transition: transform 0.2s; }
-        .stat-card:hover { transform: translateY(-5px); }
-        .stat-icon { font-size: 40px; color: #007bff; margin-right: 15px; }
-        .stat-content h3 { margin: 0; font-size: 24px; color: #333; }
-        .stat-content p { margin: 0; color: #777; }
-        .recent-activity, .top-customers, .chart-container, .notifications { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); margin-top: 20px; }
-        .quick-links { margin-top: 30px; }
-        .quick-links a { display: inline-block; margin: 5px; padding: 10px 15px; color: #fff; background: #007bff; border-radius: 5px; text-decoration: none; transition: background 0.2s; }
-        .quick-links a:hover { background: #0056b3; }
-    </style>
-</head>
-<body>
-<div class="container">
-    <h1>Chào mừng, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1>
-
-    <div class="row">
-        <div class="col-md-4">
-            <div class="stat-card">
-                <span class="stat-icon glyphicon glyphicon-user"></span>
-                <div class="stat-content">
-                    <h3><?php echo $customer_count; ?></h3>
-                    <p>Khách Hàng</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="stat-card">
-                <span class="stat-icon glyphicon glyphicon-shopping-cart"></span>
-                <div class="stat-content">
-                    <h3><?php echo $order_count; ?></h3>
-                    <p>Đơn Hàng</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="stat-card">
-                <span class="stat-icon glyphicon glyphicon-usd"></span>
-                <div class="stat-content">
-                    <h3><?php echo number_format($total_revenue, 2); ?> USD</h3>
-                    <p>Doanh Thu Tổng</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <?php
-// Số lượng khách hàng có công nợ quá hạn (ví dụ: công nợ lớn hơn 0 và quá hạn)
+// Số lượng khách hàng có công nợ quá hạn
 $overdue_customers_count = $conn->query("
     SELECT COUNT(*) 
     FROM customers 
@@ -130,102 +67,425 @@ $newest_order = $conn->query("
     ORDER BY order_date DESC 
     LIMIT 1
 ")->fetch(PDO::FETCH_ASSOC);
+// Biểu đồ trạng thái đơn hàng
+$order_status_data = $conn->query("
+    SELECT status, COUNT(*) AS count 
+    FROM orders 
+    GROUP BY status
+")->fetchAll(PDO::FETCH_ASSOC);
+
+$order_status_labels = array_column($order_status_data, 'status');
+$order_status_counts = array_column($order_status_data, 'count');
+
+// Biểu đồ Top khách hàng theo doanh thu
+$top_customers_chart = $conn->query("
+    SELECT CONCAT(first_name, ' ', last_name) AS customer_name, SUM(total_amount) AS revenue 
+    FROM orders 
+    JOIN customers ON orders.customer_id = customers.customer_id 
+    GROUP BY customers.customer_id 
+    ORDER BY revenue DESC 
+    LIMIT 5
+")->fetchAll(PDO::FETCH_ASSOC);
+
+$customer_names = array_column($top_customers_chart, 'customer_name');
+$customer_revenue = array_column($top_customers_chart, 'revenue');
+
+// Biểu đồ công nợ theo tháng
+$monthly_outstanding_query = "
+    SELECT DATE_FORMAT(order_date, '%Y-%m') AS month, SUM(outstanding_balance) AS outstanding 
+    FROM customers 
+    JOIN orders ON orders.customer_id = customers.customer_id 
+    WHERE outstanding_balance > 0
+    GROUP BY month
+    ORDER BY month";
+
+$monthly_outstanding_data = $conn->query($monthly_outstanding_query)->fetchAll(PDO::FETCH_ASSOC);
+
+$outstanding_labels = array_column($monthly_outstanding_data, 'month');
+$outstanding_data = array_column($monthly_outstanding_data, 'outstanding');
 ?>
-    <!-- Bộ lọc thời gian -->
-    <form method="GET" class="form-inline">
-        <label for="start_date">Từ ngày:</label>
-        <input type="date" name="start_date" id="start_date" class="form-control" value="<?php echo htmlspecialchars($start_date); ?>">
-        <label for="end_date">Đến ngày:</label>
-        <input type="date" name="end_date" id="end_date" class="form-control" value="<?php echo htmlspecialchars($end_date); ?>">
-        <button type="submit" class="btn btn-primary">Lọc</button>
-    </form>
 
-   <!-- Thông báo nổi bật -->
-<div class="notifications">
-    <h3>Thông Báo</h3>
-    <ul>
-        <li>Có <strong><?php echo $overdue_customers_count; ?></strong> khách hàng có công nợ quá hạn.</li>
-        <?php if ($newest_order): ?>
-            <li>Đơn hàng #<?php echo htmlspecialchars($newest_order['order_id']); ?> vừa được tạo vào <?php echo htmlspecialchars($newest_order['order_date']); ?>.</li>
-        <?php else: ?>
-            <li>Chưa có đơn hàng nào.</li>
-        <?php endif; ?>
-    </ul>
-</div>
+<!DOCTYPE html>
+<html lang="vi">
 
-    <!-- Hoạt Động Gần Đây -->
-    <div class="recent-activity">
-        <h3>Hoạt Động Gần Đây</h3>
-        <h4>Đơn Hàng Mới</h4>
-        <ul>
-            <?php foreach ($recent_orders as $order): ?>
-                <li>Đơn hàng #<?php echo $order['order_id']; ?> - <?php echo htmlspecialchars($order['order_date']); ?> - <?php echo number_format($order['total_amount'], 2); ?> USD</li>
-            <?php endforeach; ?>
-        </ul>
-    </div>
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý Fabric Agency - Bảng Điều Khiển</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: #f1f3f8;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
 
-    <!-- Top Khách Hàng -->
-    <div class="top-customers">
-        <h3>Top Khách Hàng</h3>
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <th>Tên Khách Hàng</th>
-                <th>Doanh Thu</th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php foreach ($top_customers as $customer): ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($customer['first_name'] . ' ' . $customer['last_name']); ?></td>
-                    <td><?php echo number_format($customer['revenue'], 2); ?> USD</td>
-                </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
 
-    <!-- Biểu Đồ Doanh Thu Theo Tháng -->
-    <div class="chart-container">
-        <h3>Doanh Thu Theo Tháng</h3>
-        <canvas id="revenueChart"></canvas>
-    </div>
+        h1 {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 25px;
+        }
 
-    <div class="quick-links">
-        <h3>Liên Kết Nhanh</h3>
-        <a href="create_order.php">Tạo Đơn Hàng Mới</a>
-        <a href="customers.php">Quản Lý Khách Hàng</a>
-        <a href="sales_statistics.php">Thống Kê Doanh Thu</a>
-    </div>
-</div>
+        .stat-card {
+            background: linear-gradient(135deg, #42a5f5, #478ed1);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            color: #fff;
+            transition: transform 0.2s ease-in-out;
+            margin-bottom: 20px;
+        }
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-<script>
-    const revenueData = {
-        labels: <?php echo json_encode($monthly_labels); ?>,
-        datasets: [{
-            label: 'Doanh Thu (USD)',
-            data: <?php echo json_encode($monthly_data); ?>,
-            backgroundColor: 'rgba(0, 123, 255, 0.2)',
-            borderColor: 'rgba(0, 123, 255, 1)',
-            borderWidth: 2,
-            fill: true
-        }]
-    };
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0px 8px 12px rgba(0, 0, 0, 0.2);
+        }
 
-    const config = {
-        type: 'line',
-        data: revenueData,
-        options: {
-            responsive: true,
-            scales: {
-                y: { beginAtZero: true }
+        .stat-icon {
+            font-size: 50px;
+            color: #ffeb3b;
+            margin-right: 15px;
+        }
+
+        .stat-content h3 {
+            font-size: 30px;
+            margin: 0;
+            color: #fff;
+        }
+
+        .stat-content p {
+            font-size: 16px;
+            color: #e3e3e3;
+        }
+
+        /* Bố cục lưới cho biểu đồ */
+        .chart-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            margin: 20px 0;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            /* 2 biểu đồ mỗi hàng trên màn hình lớn */
+            gap: 20px;
+        }
+
+        .chart-container h3 {
+            font-size: 22px;
+            color: #333;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+                /* 1 biểu đồ mỗi hàng trên màn hình nhỏ */
             }
         }
-    };
 
-    const revenueChart = new Chart(document.getElementById('revenueChart'), config);
-</script>
+        /* Thiết kế các liên kết nhanh */
+        .quick-links {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .quick-links a {
+            display: inline-block;
+            margin: 5px;
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #42a5f5;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+
+        .quick-links a:hover {
+            background-color: #1e88e5;
+        }
+        .dashboard-image-container {
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+
+.dashboard-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Chào mừng, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="stat-card" data-aos="fade-up">
+                    <span class="stat-icon glyphicon glyphicon-user"></span>
+                    <div class="stat-content">
+                        <h3><?php echo $customer_count; ?></h3>
+                        <p>Khách Hàng</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card" data-aos="fade-up">
+                    <span class="stat-icon glyphicon glyphicon-shopping-cart"></span>
+                    <div class="stat-content">
+                        <h3><?php echo $order_count; ?></h3>
+                        <p>Đơn Hàng</p>
+                    </div>
+                </div>
+            </div>  
+            <div class="col-md-4">
+                <div class="stat-card" data-aos="fade-up">
+                    <span class="stat-icon glyphicon glyphicon-usd"></span>
+                    <div class="stat-content">
+                        <h3><?php echo number_format($total_revenue, 2); ?> USD</h3>
+                        <p>Doanh Thu Tổng</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bộ lọc thời gian -->
+        <form method="GET" class="form-inline">
+            <label for="start_date">Từ ngày:</label>
+            <input type="text" name="start_date" id="start_date" class="form-control" value="<?php echo htmlspecialchars($start_date); ?>" placeholder="yyyy-mm-dd">
+            <label for="end_date">Đến ngày:</label>
+            <input type="text" name="end_date" id="end_date" class="form-control" value="<?php echo htmlspecialchars($end_date); ?>" placeholder="yyyy-mm-dd">
+            <button type="submit" class="btn btn-primary">Lọc</button>
+        </form>
+        
+        <!-- Thông báo nổi bật -->
+        <div class="notifications" data-aos="fade-up">
+            <h3>Thông Báo</h3>
+            <ul>
+                <li>Có <strong><?php echo $overdue_customers_count; ?></strong> khách hàng có công nợ quá hạn.</li>
+                <?php if ($newest_order): ?>
+                    <li>Đơn hàng #<?php echo htmlspecialchars($newest_order['order_id']); ?> vừa được tạo vào <?php echo htmlspecialchars($newest_order['order_date']); ?>.</li>
+                <?php else: ?>
+                    <li>Chưa có đơn hàng nào.</li>
+                <?php endif; ?>
+            </ul>
+        </div>
+
+        <!-- Hoạt Động Gần Đây -->
+        <div class="recent-activity" data-aos="fade-up">
+            <h3>Hoạt Động Gần Đây</h3>
+            <h4>Đơn Hàng Mới</h4>
+            <ul>
+                <?php foreach ($recent_orders as $order): ?>
+                    <li>Đơn hàng #<?php echo $order['order_id']; ?> - <?php echo htmlspecialchars($order['order_date']); ?> - <?php echo number_format($order['total_amount'], 2); ?> USD</li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+
+        <!-- Top Khách Hàng -->
+        <div class="top-customers" data-aos="fade-up">
+            <h3>Top Khách Hàng</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Tên Khách Hàng</th>
+                        <th>Doanh Thu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($top_customers as $customer): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($customer['first_name'] . ' ' . $customer['last_name']); ?></td>
+                            <td><?php echo number_format($customer['revenue'], 2); ?> USD</td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <div class="chart-grid">
+            <!-- Biểu Đồ Doanh Thu Theo Tháng -->
+            <div class="chart-container" data-aos="fade-up">
+                <h3>Doanh Thu Theo Tháng</h3>
+                <canvas id="revenueChart"></canvas>
+            </div>
+
+            <!-- Biểu đồ trạng thái đơn hàng -->
+            <div class="chart-container" data-aos="fade-up">
+                <h3>Trạng Thái Đơn Hàng</h3>
+                <canvas id="statusChart"></canvas>
+            </div>
+
+            <!-- Biểu đồ thanh top khách hàng -->
+            <div class="chart-container" data-aos="fade-up">
+                <h3>Top 5 Khách Hàng Theo Doanh Thu</h3>
+                <canvas id="topCustomersChart"></canvas>
+            </div>
+
+            <!-- Biểu đồ công nợ theo tháng -->
+            <div class="chart-container" data-aos="fade-up">
+                <h3>Công Nợ Theo Tháng</h3>
+                <canvas id="outstandingChart"></canvas>
+            </div>
+        </div>
+        <div class="quick-links">
+            <h3>Liên Kết Nhanh</h3>
+            <a href="create_order.php">Tạo Đơn Hàng Mới</a>
+            <a href="customers.php">Quản Lý Khách Hàng</a>
+            <a href="sales_statistics.php">Thống Kê Doanh Thu</a>
+        </div>
+    </div>
+
+    <script>
+        AOS.init({
+            duration: 800,
+            once: true
+        });
+
+        $(function() {
+            $("#start_date, #end_date").datepicker({
+                dateFormat: 'yy-mm-dd',
+                maxDate: new Date()
+            });
+        });
+
+        // Biểu đồ Doanh Thu Theo Tháng (Biểu đồ Đường)
+        const revenueData = {
+            labels: <?php echo json_encode($monthly_labels); ?>,
+            datasets: [{
+                label: 'Doanh Thu (USD)',
+                data: <?php echo json_encode($monthly_data); ?>,
+                backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                borderColor: 'rgba(0, 123, 255, 1)',
+                borderWidth: 2,
+                fill: true
+            }]
+        };
+
+        const revenueChart = new Chart(document.getElementById('revenueChart'), {
+            type: 'line',
+            data: revenueData,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Biểu đồ Trạng Thái Đơn Hàng (Biểu đồ Tròn)
+        const statusData = {
+            labels: <?php echo json_encode($order_status_labels); ?>,
+            datasets: [{
+                data: <?php echo json_encode($order_status_counts); ?>,
+                backgroundColor: ['#4caf50', '#ff9800', '#f44336', '#2196f3', '#9e9e9e']
+            }]
+        };
+
+        const statusChart = new Chart(document.getElementById('statusChart'), {
+            type: 'pie',
+            data: statusData,
+            options: {
+                responsive: true
+            }
+        });
+
+        // Biểu đồ Top Khách Hàng (Biểu đồ Thanh)
+        const topCustomersData = {
+            labels: <?php echo json_encode($customer_names); ?>,
+            datasets: [{
+                label: 'Doanh Thu (USD)',
+                data: <?php echo json_encode($customer_revenue); ?>,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        const topCustomersChart = new Chart(document.getElementById('topCustomersChart'), {
+            type: 'bar',
+            data: topCustomersData,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Doanh Thu (USD)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Biểu đồ Công Nợ Hàng Tháng (Biểu đồ Đường)
+        const outstandingData = {
+            labels: <?php echo json_encode($outstanding_labels); ?>,
+            datasets: [{
+                label: 'Công Nợ (USD)',
+                data: <?php echo json_encode($outstanding_data); ?>,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                fill: true
+            }]
+        };
+
+        const outstandingChart = new Chart(document.getElementById('outstandingChart'), {
+            type: 'line',
+            data: outstandingData,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Công Nợ (USD)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Tháng'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
 </body>
+
 </html>

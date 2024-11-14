@@ -9,13 +9,23 @@ require 'connect.php';
 include 'nav.php'; // Bao gồm thanh điều hướng
 
 // Lấy danh sách khách hàng và nhân viên
-$customers = $conn->query("SELECT customer_id, first_name, last_name FROM Customers")->fetchAll(PDO::FETCH_ASSOC);
-$employees = $conn->query("SELECT employee_id, first_name, last_name FROM Employees")->fetchAll(PDO::FETCH_ASSOC);
+$customers = $conn->query("SELECT customer_id, first_name, last_name FROM customers")->fetchAll(PDO::FETCH_ASSOC);
+$employees = $conn->query("SELECT employee_id, first_name, last_name FROM employees")->fetchAll(PDO::FETCH_ASSOC);
 
-// Lấy danh sách các cuộn vải và giá từ kho, bao gồm hình ảnh
-$fabric_rolls = $conn->query("SELECT Fabric_Rolls.roll_id, Fabric_Types.name AS fabric_name, Fabric_Types.current_price, Fabric_Rolls.length, Fabric_Types.image 
-                              FROM Fabric_Rolls 
-                              JOIN Fabric_Types ON Fabric_Rolls.fabric_type_id = Fabric_Types.fabric_type_id")->fetchAll(PDO::FETCH_ASSOC);
+// Lấy danh sách các cuộn vải và thông tin liên quan, bao gồm tên loại vải, giá, hình ảnh và tồn kho từ inventory
+$fabric_rolls = $conn->query("
+    SELECT 
+        fabric_rolls.roll_id, 
+        fabric_types.name AS fabric_name, 
+        fabric_types.current_price, 
+        fabric_rolls.length, 
+        fabric_types.image, 
+        COALESCE(SUM(inventory.quantity), 0) AS total_inventory_quantity 
+    FROM fabric_rolls
+    JOIN fabric_types ON fabric_rolls.fabric_type_id = fabric_types.fabric_type_id
+    LEFT JOIN inventory ON fabric_types.fabric_type_id = inventory.fabric_type_id
+    GROUP BY fabric_rolls.roll_id
+")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -153,14 +163,23 @@ $fabric_rolls = $conn->query("SELECT Fabric_Rolls.roll_id, Fabric_Types.name AS 
         }
     </style>
     <script>
-        // Hàm tính tổng tiền theo USD
+        // Hàm tính tổng tiền theo USD và kiểm tra tồn kho
         function calculateTotal() {
             const productItems = document.querySelectorAll('.product-item');
             let totalAmount = 0;
 
             productItems.forEach(item => {
                 const price = parseFloat(item.getAttribute('data-price'));
-                const quantity = parseInt(item.querySelector('.quantity').value, 10);
+                const quantityInput = item.querySelector('.quantity');
+                let quantity = parseInt(quantityInput.value, 10);
+                const availableInventory = parseFloat(item.getAttribute('data-inventory'));
+
+                if (quantity > availableInventory) {
+                    alert(`Số lượng yêu cầu cho ${item.querySelector('.product-name').innerText} vượt quá tồn kho (${availableInventory} còn lại).`);
+                    quantity = availableInventory;  // Đặt lại giá trị bằng số lượng khả dụng
+                    quantityInput.value = availableInventory;
+                }
+
                 totalAmount += price * quantity;
             });
 
@@ -178,7 +197,7 @@ $fabric_rolls = $conn->query("SELECT Fabric_Rolls.roll_id, Fabric_Types.name AS 
             <select name="customer_id" required>
                 <?php foreach ($customers as $customer): ?>
                     <option value="<?= $customer['customer_id']; ?>">
-                        <?= $customer['first_name'] . " " . $customer['last_name']; ?>
+                        <?= htmlspecialchars($customer['first_name'] . " " . $customer['last_name']); ?>
                     </option>
                 <?php endforeach; ?>
             </select>
@@ -188,7 +207,7 @@ $fabric_rolls = $conn->query("SELECT Fabric_Rolls.roll_id, Fabric_Types.name AS 
             <select name="employee_id" required>
                 <?php foreach ($employees as $employee): ?>
                     <option value="<?= $employee['employee_id']; ?>">
-                        <?= $employee['first_name'] . " " . $employee['last_name']; ?>
+                        <?= htmlspecialchars($employee['first_name'] . " " . $employee['last_name']); ?>
                     </option>
                 <?php endforeach; ?>
             </select>
@@ -197,10 +216,14 @@ $fabric_rolls = $conn->query("SELECT Fabric_Rolls.roll_id, Fabric_Types.name AS 
             <label>Chọn Cuộn Vải:</label>
             <div class="product-options">
                 <?php foreach ($fabric_rolls as $roll): ?>
-                    <div class="product-item" data-price="<?= $roll['current_price'] ?>">
-                        <img src="img/<?= $roll['image']; ?>" alt="<?= $roll['fabric_name']; ?>">
-                        <span class="product-name"><?= $roll['fabric_name']; ?> - Giá: $<?= $roll['current_price']; ?>/m - Dài: <?= $roll['length']; ?> mét</span>
-                        <input type="number" class="quantity" name="quantity[<?= $roll['roll_id']; ?>]" value="1" min="1" onchange="calculateTotal()">
+                    <div class="product-item" data-price="<?= $roll['current_price'] ?>" data-inventory="<?= $roll['total_inventory_quantity'] ?>">
+                        <img src="img/<?= htmlspecialchars($roll['image']); ?>" alt="<?= htmlspecialchars($roll['fabric_name']); ?>">
+                        <span class="product-name">
+                            <?= htmlspecialchars($roll['fabric_name']); ?> - Giá: $<?= number_format($roll['current_price'], 2); ?>/m - 
+                            Dài: <?= number_format($roll['length'], 2); ?> mét - 
+                            Tồn kho: <?= $roll['total_inventory_quantity']; ?> đơn vị
+                        </span>
+                        <input type="number" class="quantity" name="quantity[<?= $roll['roll_id']; ?>]" value="0" min="0" onchange="calculateTotal()">
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -210,7 +233,7 @@ $fabric_rolls = $conn->query("SELECT Fabric_Rolls.roll_id, Fabric_Types.name AS 
             <input type="hidden" id="total_amount" name="total_amount" step="0.01" required readonly>
 
             <!-- Nút tạo đơn hàng -->
-            <button type="submit">Tạo Đơn Hàng</button>
+            <button type="submit">Tạo Đơn Hàng</button 
         </form>
     </div>
 </body>

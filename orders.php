@@ -8,17 +8,41 @@ if (!isset($_SESSION['user_id'])) {
 require 'connect.php';
 include 'nav.php'; // Bao gồm thanh điều hướng
 
-// Kiểm tra nếu có yêu cầu xóa đơn hàng
+// Xử lý xóa đơn hàng
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_order_id'])) {
     $order_id = $_POST['delete_order_id'];
-
-    // Xóa các dòng liên quan trong Order_Fabric_Rolls và Order_Payments nếu có
     $conn->prepare("DELETE FROM Order_Fabric_Rolls WHERE order_id = :order_id")->execute(['order_id' => $order_id]);
     $conn->prepare("DELETE FROM Order_Payments WHERE order_id = :order_id")->execute(['order_id' => $order_id]);
-
-    // Xóa đơn hàng chính
     $stmt = $conn->prepare("DELETE FROM Orders WHERE order_id = :order_id");
     $stmt->execute(['order_id' => $order_id]);
+}
+
+// Xử lý thanh toán đơn hàng
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay_order_id'])) {
+    $order_id = $_POST['pay_order_id'];
+    $payment_amount = floatval($_POST['payment_amount']);
+    
+    // Lấy tổng tiền đơn hàng và số tiền đã thanh toán
+    $order_stmt = $conn->prepare("SELECT total_amount FROM Orders WHERE order_id = :order_id");
+    $order_stmt->execute(['order_id' => $order_id]);
+    $total_amount = $order_stmt->fetchColumn();
+
+    $paid_stmt = $conn->prepare("SELECT COALESCE(SUM(amount), 0) FROM Order_Payments WHERE order_id = :order_id");
+    $paid_stmt->execute(['order_id' => $order_id]);
+    $total_paid = $paid_stmt->fetchColumn();
+
+    $remaining_balance = $total_amount - $total_paid;
+
+    if ($payment_amount > $remaining_balance) {
+        echo "<script>alert('Số tiền thanh toán vượt quá số dư. Vui lòng thử lại.');</script>";
+    } else {
+        $stmt = $conn->prepare("INSERT INTO Order_Payments (order_id, payment_date, amount) VALUES (:order_id, NOW(), :amount)");
+        $stmt->execute(['order_id' => $order_id, 'amount' => $payment_amount]);
+
+        $new_status = ($payment_amount == $remaining_balance) ? 'paid' : 'partial_payment';
+        $status_stmt = $conn->prepare("UPDATE Orders SET status = :status WHERE order_id = :order_id");
+        $status_stmt->execute(['status' => $new_status, 'order_id' => $order_id]);
+    }
 }
 
 // Xử lý tìm kiếm và sắp xếp
@@ -26,12 +50,10 @@ $query = isset($_GET['query']) ? $_GET['query'] : '';
 $order_by = isset($_GET['order_by']) ? $_GET['order_by'] : 'order_id';
 $order_dir = isset($_GET['order_dir']) && $_GET['order_dir'] === 'desc' ? 'desc' : 'asc';
 
-// Thiết lập phân trang
-$limit = 10; // Số bản ghi trên mỗi trang
+$limit = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
-// Truy vấn SQL tìm kiếm và sắp xếp có phân trang
 $sql = "SELECT Orders.*, 
                Customers.first_name, Customers.last_name, 
                Employees.first_name AS emp_first_name, Employees.last_name AS emp_last_name 
@@ -48,17 +70,15 @@ $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Đếm tổng số bản ghi để tính tổng số trang
 $total_stmt = $conn->prepare("SELECT COUNT(*) FROM Orders JOIN Customers ON Orders.customer_id = Customers.customer_id WHERE Customers.first_name LIKE :query OR Customers.last_name LIKE :query");
 $total_stmt->execute([':query' => "%$query%"]);
 $total_rows = $total_stmt->fetchColumn();
 $total_pages = ceil($total_rows / $limit);
 
-// Đảo chiều sắp xếp
 $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
 ?>
 
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -201,6 +221,18 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
             border: 1px solid #007bff;
         }
     </style>
+  <script>
+        function openPaymentModal(orderId, remainingBalance) {
+            const amount = prompt(`Nhập số tiền thanh toán (tối đa $${remainingBalance.toFixed(2)}):`);
+            if (amount && parseFloat(amount) > 0 && parseFloat(amount) <= remainingBalance) {
+                document.getElementById('pay_order_id').value = orderId;
+                document.getElementById('payment_amount').value = parseFloat(amount);
+                document.getElementById('payment_form').submit();
+            } else {
+                alert('Vui lòng nhập số tiền hợp lệ.');
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="container">
@@ -213,6 +245,11 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
             <input type="hidden" name="order_dir" value="<?= htmlspecialchars($order_dir) ?>">
         </form>
 
+        <form method="POST" id="payment_form">
+            <input type="hidden" name="pay_order_id" id="pay_order_id">
+            <input type="hidden" name="payment_amount" id="payment_amount">
+        </form>
+
         <table>
             <tr>
                 <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=order_id&order_dir=<?= $new_order_dir ?>">ID</a></th>
@@ -220,30 +257,40 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
                 <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=emp_first_name&order_dir=<?= $new_order_dir ?>">Nhân Viên</a></th>
                 <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=order_date&order_dir=<?= $new_order_dir ?>">Ngày Đặt</a></th>
                 <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=total_amount&order_dir=<?= $new_order_dir ?>">Tổng Tiền</a></th>
+                <th>Số Tiền Chưa Thanh Toán</th> <!-- Thêm cột mới -->
                 <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=status&order_dir=<?= $new_order_dir ?>">Trạng Thái</a></th>
                 <th>Hành động</th>
             </tr>
             <?php if (!empty($orders)): ?>
                 <?php foreach ($orders as $order): ?>
+                    <?php
+                    // Lấy số tiền đã thanh toán
+                    $total_paid = $conn->query("SELECT COALESCE(SUM(amount), 0) FROM Order_Payments WHERE order_id = " . $order['order_id'])->fetchColumn();
+                    $remaining_balance = $order['total_amount'] - $total_paid;
+                    ?>
                     <tr>
                         <td><?= $order['order_id']; ?></td>
                         <td><?= htmlspecialchars($order['first_name'] . " " . $order['last_name']); ?></td>
                         <td><?= htmlspecialchars($order['emp_first_name'] . " " . $order['emp_last_name']); ?></td>
                         <td><?= htmlspecialchars($order['order_date']); ?></td>
                         <td><?= htmlspecialchars($order['total_amount']); ?></td>
+                        <td><?= htmlspecialchars(number_format($total_paid, 2)); ?></td> <!-- Hiển thị số tiền đã thanh toán -->
                         <td><?= htmlspecialchars($order['status']); ?></td>
                         <td class="action-buttons">
                             <a href="edit_order.php?id=<?= $order['order_id']; ?>" class="edit-btn">Sửa</a>
-                            <form method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa đơn hàng này?');">
+                            <form method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa đơn hàng này?');" style="display:inline;">
                                 <input type="hidden" name="delete_order_id" value="<?= $order['order_id']; ?>">
                                 <button type="submit" class="delete-btn">Xóa</button>
                             </form>
+                            <?php if ($order['status'] !== 'paid'): ?>
+                                <button type="button" onclick="openPaymentModal(<?= $order['order_id']; ?>, <?= $remaining_balance; ?>)" class="pay-btn">Thanh toán</button>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="7" style="text-align: center;">Không tìm thấy đơn hàng nào.</td>
+                    <td colspan="8" style="text-align: center;">Không tìm thấy đơn hàng nào.</td> <!-- Cập nhật colspan để khớp với cột mới -->
                 </tr>
             <?php endif; ?>
         </table>
