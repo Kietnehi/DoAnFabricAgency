@@ -31,6 +31,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $amount = $_POST['amount'];
     $payment_date = date('Y-m-d H:i:s');
 
+    // Kiểm tra trạng thái đơn hàng
+    $order_status_stmt = $conn->prepare("SELECT Status FROM orders WHERE OCode = ?");
+    $order_status_stmt->execute([$order_code]);
+    $order_status = $order_status_stmt->fetchColumn();
+
+    if ($order_status === 'cancelled') {
+        echo "<script>alert('Đơn hàng đã bị hủy. Không thể thanh toán cho đơn hàng này.'); window.location.href = 'customer_payments.php';</script>";
+        exit();
+    }
+
     // Thêm thanh toán vào bảng `customer_partialpayments`
     $sql = "INSERT INTO customer_partialpayments (CusId, Amount, PaymentTime, OCode) VALUES (?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
@@ -56,6 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     header("Location: customer_payments.php");
     exit();
 }
+
 
 // Truy vấn SQL với sắp xếp
 $stmt = $conn->prepare("
@@ -114,15 +125,23 @@ $customers = $conn->query("SELECT CusId, Fname, Lname, Dept FROM customer")->fet
                         Số Tiền (USD)
                     </a>
                 </th>
+                <th>Trạng Thái Đơn Hàng</th>
                 <th>Thao Tác</th>
             </tr>
             <?php if (!empty($payments)): ?>
                 <?php foreach ($payments as $payment): ?>
+                    <?php
+                    // Lấy trạng thái đơn hàng
+                    $order_stmt = $conn->prepare("SELECT Status FROM orders WHERE OCode = ?");
+                    $order_stmt->execute([$payment['OCode']]);
+                    $order_status = $order_stmt->fetchColumn();
+                    ?>
                     <tr>
                         <td><?= htmlspecialchars($payment['CusId']); ?></td>
                         <td><?= htmlspecialchars($payment['Fname'] . " " . $payment['Lname']); ?></td>
                         <td><?= htmlspecialchars($payment['PaymentTime']); ?></td>
                         <td>$<?= htmlspecialchars(number_format($payment['Amount'], 2)); ?> USD</td>
+                        <td><?= $order_status === 'completed' ? 'Đã Hoàn Thành' : 'Chưa Hoàn Thành'; ?></td>
                         <td>
                             <a href="customer_orders.php?customer_id=<?= htmlspecialchars($payment['CusId']); ?>">Xem Chi Tiết</a>
                         </td>
@@ -130,7 +149,7 @@ $customers = $conn->query("SELECT CusId, Fname, Lname, Dept FROM customer")->fet
                 <?php endforeach; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="5">Không có thanh toán nào.</td>
+                    <td colspan="6">Không có thanh toán nào.</td>
                 </tr>
             <?php endif; ?>
         </table>
@@ -142,40 +161,63 @@ $customers = $conn->query("SELECT CusId, Fname, Lname, Dept FROM customer")->fet
         </div>
 
         <h2>Thêm Thanh Toán Mới</h2>
-<form action="customer_payments.php" method="POST">
-    <label for="customer_id">Khách Hàng:</label>
-    <select name="customer_id" required>
-        <?php foreach ($customers as $customer): ?>
-            <option value="<?= htmlspecialchars($customer['CusId']) ?>">
-                <?= htmlspecialchars($customer['Fname'] . " " . $customer['Lname']) ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
-
-    <label for="order_code">Mã Đơn Hàng:</label>
-    <select name="order_code" required>
-        <?php
-        // Lấy danh sách đơn hàng của khách hàng
-        if (!empty($customers)) {
-            $orders_stmt = $conn->prepare("SELECT OCode, TotalPrice FROM orders WHERE CusId = ?");
-            foreach ($customers as $customer) {
-                $orders_stmt->execute([$customer['CusId']]);
-                $orders = $orders_stmt->fetchAll(PDO::FETCH_ASSOC);
-                foreach ($orders as $order): ?>
-                    <option value="<?= htmlspecialchars($order['OCode']) ?>">
-                        <?= htmlspecialchars("Order #" . $order['OCode'] . " - Total: $" . number_format($order['TotalPrice'], 2)) ?>
+        <form action="customer_payments.php" method="POST">
+            <label for="customer_id">Khách Hàng:</label>
+            <select name="customer_id" required onchange="fetchOrders(this.value)">
+                <option value="">-- Chọn khách hàng --</option>
+                <?php foreach ($customers as $customer): ?>
+                    <option value="<?= htmlspecialchars($customer['CusId']) ?>">
+                        <?= htmlspecialchars($customer['Fname'] . " " . $customer['Lname']) ?>
                     </option>
-                <?php endforeach;
+                <?php endforeach; ?>
+            </select>
+
+            <label for="order_code">Mã Đơn Hàng:</label>
+            <select name="order_code" id="order_code" required>
+                <option value="">-- Chọn đơn hàng --</option>
+            </select>
+
+            <label for="amount">Số Tiền Thanh Toán (USD):</label>
+            <input type="number" name="amount" step="0.01" required id="amount">
+
+            <button type="submit">Xác Nhận Thanh Toán</button>
+        </form>
+
+        <script>
+            function fetchOrders(customerId) {
+                if (!customerId) {
+                    document.getElementById('order_code').innerHTML = '<option value="">-- Chọn đơn hàng --</option>';
+                    return;
+                }
+
+                // Fetch orders of the selected customer
+                fetch('fetch_orders.php?customer_id=' + customerId)
+                    .then(response => response.json())
+                    .then(data => {
+                        const orderCodeSelect = document.getElementById('order_code');
+                        orderCodeSelect.innerHTML = '<option value="">-- Chọn đơn hàng --</option>';
+
+                        if (data.length === 0) {
+                            orderCodeSelect.innerHTML = '<option value="">Không có đơn hàng nào</option>';
+                        } else {
+                            data.forEach(order => {
+                                if (order.status === 'cancelled') {
+                                    orderCodeSelect.innerHTML += `<option disabled>
+                                        Order #${order.OCode} - ${order.TotalPrice} USD (Đã Hủy)
+                                    </option>`;
+                                } else {
+                                    orderCodeSelect.innerHTML += `<option value="${order.OCode}">
+                                        Order #${order.OCode} - ${order.TotalPrice} USD
+                                    </option>`;
+                                }
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error fetching orders:', err);
+                    });
             }
-        }
-        ?>
-    </select>
-
-    <label for="amount">Số Tiền Thanh Toán (USD):</label>
-    <input type="number" name="amount" step="0.01" required>
-
-    <button type="submit">Xác Nhận Thanh Toán</button>
-</form>
+        </script>
     </div>
 </body>
 </html>

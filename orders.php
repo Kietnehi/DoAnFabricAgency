@@ -55,25 +55,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay_order_id'])) {
 // Xử lý xóa đơn hàng
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_order_id'])) {
     $order_id = $_POST['delete_order_id'];
-    $cancellation_reason = $_POST['cancellation_reason'];
 
     // Kiểm tra xem đơn hàng có tồn tại không
     $check_stmt = $conn->prepare("SELECT OCode FROM orders WHERE OCode = :order_id");
     $check_stmt->execute(['order_id' => $order_id]);
 
     if ($check_stmt->rowCount() > 0) {
-        // Lưu lý do hủy vào cơ sở dữ liệu và cập nhật trạng thái
-        $delete_stmt = $conn->prepare("
-            UPDATE orders 
-            SET Status = 'cancelled', Cancellation_Reason = :cancellation_reason 
-            WHERE OCode = :order_id
-        ");
-        $delete_stmt->execute([
-            'cancellation_reason' => $cancellation_reason,
-            'order_id' => $order_id
-        ]);
+        // Xóa đơn hàng khỏi cơ sở dữ liệu
+        $delete_stmt = $conn->prepare("DELETE FROM orders WHERE OCode = :order_id");
+        $delete_stmt->execute(['order_id' => $order_id]);
 
-        echo "<script>alert('Đơn hàng đã được hủy thành công.');</script>";
+        // Xóa tất cả các khoản thanh toán liên quan đến đơn hàng
+        $delete_payments_stmt = $conn->prepare("DELETE FROM customer_partialpayments WHERE OCode = :order_id");
+        $delete_payments_stmt->execute(['order_id' => $order_id]);
+
+        // Thông báo thành công và chuyển hướng về trang quản lý đơn hàng
+        echo "<script>alert('Đơn hàng đã được xóa thành công.'); window.location.href = 'orders.php';</script>";
     } else {
         echo "<script>alert('Đơn hàng không tồn tại hoặc đã bị xóa.');</script>";
     }
@@ -120,8 +117,6 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
     <title>Quản lý Đơn Hàng</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="orders.css">
-    
-
     <style>
         .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
         .modal-content { background-color: white; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; }
