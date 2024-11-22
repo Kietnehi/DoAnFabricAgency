@@ -11,20 +11,29 @@ if ($page < 1) $page = 1;
 // Tính toán chỉ mục bắt đầu
 $offset = ($page - 1) * $productsPerPage;
 
-// Lấy tổng số sản phẩm
-$totalProductsStmt = $conn->prepare("SELECT COUNT(*) FROM category");
-$totalProductsStmt->execute();
+// Lấy từ khóa tìm kiếm
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+
+// Lấy tổng số sản phẩm (có hoặc không có tìm kiếm)
+$totalProductsStmt = $conn->prepare("SELECT COUNT(*) FROM category c 
+                                     LEFT JOIN supplier s ON c.SCode = s.SCode 
+                                     WHERE c.Name LIKE :search OR c.CCode LIKE :search OR s.Name LIKE :search");
+$totalProductsStmt->execute([':search' => "%$search%"]);
 $totalProducts = $totalProductsStmt->fetchColumn();
 
 // Tính tổng số trang
 $totalPages = ceil($totalProducts / $productsPerPage);
 
-// Lấy danh sách sản phẩm cho trang hiện tại
-$sql = "SELECT c.CCode, c.Name, c.Color, c.Price, c.AppliedDate, c.RemainQuantity, c.img, s.Name AS SupplierName 
+// Lấy danh sách sản phẩm và thông tin chi tiết từ bảng supplier
+$sql = "SELECT 
+            c.CCode, c.Name AS ProductName, c.Color, c.Price, c.AppliedDate, c.RemainQuantity, c.img, 
+            s.SCode, s.Name AS SupplierName, s.Address, s.Phone, s.BankAccount, s.TaxCode 
         FROM category c 
         LEFT JOIN supplier s ON c.SCode = s.SCode
+        WHERE c.Name LIKE :search OR c.CCode LIKE :search OR s.Name LIKE :search
         LIMIT :offset, :productsPerPage";
 $stmt = $conn->prepare($sql);
+$stmt->bindValue(':search', "%$search%", PDO::PARAM_STR);
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->bindValue(':productsPerPage', $productsPerPage, PDO::PARAM_INT);
 $stmt->execute();
@@ -35,27 +44,21 @@ if (isset($_GET['delete'])) {
     $CCode = $_GET['delete'];
 
     try {
-        // Bắt đầu giao dịch
         $conn->beginTransaction();
 
-        // Xóa các bản ghi trong `supplyhistory` liên quan đến `category` có `CCode` tương ứng
         $sql = "DELETE FROM supplyhistory WHERE CCode = :CCode";
         $stmt = $conn->prepare($sql);
         $stmt->execute([':CCode' => $CCode]);
 
-        // Xóa sản phẩm trong bảng `category`
         $sql = "DELETE FROM category WHERE CCode = :CCode";
         $stmt = $conn->prepare($sql);
         $stmt->execute([':CCode' => $CCode]);
 
-        // Xác nhận giao dịch
         $conn->commit();
 
-        // Chuyển hướng sau khi xóa thành công
         header('Location: product_manager.php?page=' . $page);
         exit;
     } catch (PDOException $e) {
-        // Hủy giao dịch nếu có lỗi
         $conn->rollBack();
         echo "Error: " . $e->getMessage();
     }
@@ -71,7 +74,6 @@ include 'nav.php';
     <link rel="stylesheet" href="product_manager.css">
     <title>Quản lý sản phẩm</title>
     <style>
-        /* Định dạng bảng */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -81,13 +83,9 @@ include 'nav.php';
             padding: 8px;
             text-align: center;
         }
-
-        /* Định dạng hình ảnh */
         img {
             border-radius: 5px;
         }
-
-        /* Định dạng nút */
         .btn {
             padding: 5px 10px;
             margin: 2px;
@@ -118,17 +116,9 @@ include 'nav.php';
         .btn-success:hover {
             background-color: #218838;
         }
-        .action-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 5px;
-        }
-
-        /* Phân trang */
         .pagination {
             display: flex;
             justify-content: center;
-            margin-top: 20px;
             list-style-type: none;
             padding: 0;
         }
@@ -149,6 +139,29 @@ include 'nav.php';
             font-weight: bold;
             background-color: #0056b3;
         }
+        .search-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .search-container input[type="text"] {
+            width: 300px;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .search-container button {
+            padding: 8px 16px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .search-container button:hover {
+            background-color: #0056b3;
+        }
     </style>
     <script>
         function confirmDelete(url) {
@@ -160,6 +173,13 @@ include 'nav.php';
 </head>
 <body>
 
+<div class="search-container">
+    <form method="GET" action="product_manager.php">
+        <input type="text" name="search" value="<?= htmlspecialchars($search); ?>" placeholder="Nhập mã, tên sản phẩm hoặc nhà cung cấp...">
+        <button type="submit">Tìm kiếm</button>
+    </form>
+</div>
+
 <h2>Danh sách sản phẩm</h2>
 <table>
     <thead>
@@ -167,59 +187,73 @@ include 'nav.php';
             <th>Mã sản phẩm</th>
             <th>Tên sản phẩm</th>
             <th>Màu sắc</th>
-            <th>Giá hiện tại</th>
+            <th>Giá</th>
             <th>Ngày áp dụng</th>
-            <th>Số lượng còn lại</th>
+            <th>Số lượng</th>
             <th>Nhà cung cấp</th>
+            <th>Địa chỉ</th>
+            <th>Số điện thoại</th>
+            <th>Tài khoản ngân hàng</th>
+            <th>Mã số thuế</th>
             <th>Hình ảnh</th>
             <th>Hành động</th>
         </tr>
     </thead>
     <tbody>
-        <?php foreach ($products as $product): ?>
-        <tr>
-            <td><?= htmlspecialchars($product['CCode']); ?></td>
-            <td><?= htmlspecialchars($product['Name']); ?></td>
-            <td><?= htmlspecialchars($product['Color']); ?></td>
-            <td><?= number_format($product['Price'], 2); ?> USD</td>
-            <td><?= htmlspecialchars($product['AppliedDate']); ?></td>
-            <td><?= htmlspecialchars($product['RemainQuantity']); ?></td>
-            <td><?= htmlspecialchars($product['SupplierName']); ?></td>
-            <td>
-                <?php if ($product['img']): ?>
-                    <img src="img/<?= htmlspecialchars($product['img']); ?>" alt="Hình ảnh sản phẩm" width="50">
-                <?php else: ?>
-                    <p>Chưa có hình ảnh</p>
-                <?php endif; ?>
-            </td>
-            <td>
-                <div class="action-buttons">
-                    <a href="edit_product.php?edit=<?= $product['CCode']; ?>" class="btn btn-edit">Sửa</a>
-                    <a href="javascript:void(0);" onclick="confirmDelete('product_manager.php?delete=<?= $product['CCode']; ?>&page=<?= $page ?>')" class="btn btn-danger">Xóa</a>
-                    <a href="add_fabric_types.php?CCode=<?= $product['CCode']; ?>" class="btn btn-success">Thêm</a>
-                </div>
-            </td>
-        </tr>
-        <?php endforeach; ?>
+        <?php if (count($products) > 0): ?>
+            <?php foreach ($products as $product): ?>
+            <tr>
+                <td><?= htmlspecialchars($product['CCode']); ?></td>
+                <td><?= htmlspecialchars($product['ProductName']); ?></td>
+                <td><?= htmlspecialchars($product['Color']); ?></td>
+                <td><?= number_format($product['Price'], 2); ?> USD</td>
+                <td><?= htmlspecialchars($product['AppliedDate']); ?></td>
+                <td><?= htmlspecialchars($product['RemainQuantity']); ?></td>
+                <td><?= htmlspecialchars($product['SupplierName']); ?></td>
+                <td><?= htmlspecialchars($product['Address']); ?></td>
+                <td><?= htmlspecialchars($product['Phone']); ?></td>
+                <td><?= htmlspecialchars($product['BankAccount']); ?></td>
+                <td><?= htmlspecialchars($product['TaxCode']); ?></td>
+                <td>
+                    <?php if ($product['img']): ?>
+                        <img src="img/<?= htmlspecialchars($product['img']); ?>" alt="Hình ảnh sản phẩm" width="50">
+                    <?php else: ?>
+                        <p>Chưa có hình ảnh</p>
+                    <?php endif; ?>
+                </td>
+                <td>
+    <a href="edit_product.php?edit=<?= $product['CCode']; ?>" class="btn btn-edit">Sửa</a>
+    <a href="javascript:void(0);" onclick="confirmDelete('product_manager.php?delete=<?= $product['CCode']; ?>&page=<?= $page ?>')" class="btn btn-danger">Xóa</a>
+    <a href="add_fabric_types.php?CCode=<?= $product['CCode']; ?>" class="btn btn-success">Thêm</a>
+    <?php if ($product['SCode']): ?>
+        <a href="supplier_details.php?SCode=<?= $product['SCode']; ?>" class="btn btn-info">Chi tiết</a>
+    <?php endif; ?>
+</td>
+            </tr>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <tr>
+                <td colspan="13">Không tìm thấy sản phẩm nào phù hợp.</td>
+            </tr>
+        <?php endif; ?>
     </tbody>
 </table>
 
-<!-- Phân trang -->
 <ul class="pagination">
     <?php if ($page > 1): ?>
-        <li><a href="?page=<?= $page - 1; ?>">&laquo; Trước</a></li>
+        <li><a href="?search=<?= urlencode($search); ?>&page=<?= $page - 1; ?>">&laquo; Trước</a></li>
     <?php endif; ?>
 
     <?php for ($i = 1; $i <= $totalPages; $i++): ?>
         <li>
-            <a href="?page=<?= $i; ?>" class="<?= $i == $page ? 'active' : ''; ?>">
+            <a href="?search=<?= urlencode($search); ?>&page=<?= $i; ?>" class="<?= $i == $page ? 'active' : ''; ?>">
                 <?= $i; ?>
             </a>
         </li>
     <?php endfor; ?>
 
     <?php if ($page < $totalPages): ?>
-        <li><a href="?page=<?= $page + 1; ?>">Sau &raquo;</a></li>
+        <li><a href="?search=<?= urlencode($search); ?>&page=<?= $page + 1; ?>">Sau &raquo;</a></li>
     <?php endif; ?>
 </ul>
 

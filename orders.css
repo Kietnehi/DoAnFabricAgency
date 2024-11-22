@@ -133,3 +133,58 @@ tr:nth-child(even) {
     color: white;
     border: 1px solid #007bff;
 }
+    .modal {
+        display: none; 
+        position: fixed; 
+        z-index: 1; 
+        left: 0; 
+        top: 0; 
+        width: 100%; 
+        height: 100%; 
+        overflow: auto; 
+        background-color: rgba(0, 0, 0, 0.4);
+        animation: fadeIn 0.5s ease; /* Thêm hiệu ứng xuất hiện */
+    }
+    .modal-content {
+        background-color: white; 
+        margin: 15% auto; 
+        padding: 20px; 
+        border: 1px solid #888; 
+        width: 80%;
+        animation: slideDown 0.4s ease; /* Thêm hiệu ứng xuất hiện */
+    }
+    .close {
+        color: #aaa; 
+        float: right; 
+        font-size: 28px; 
+        font-weight: bold; 
+        cursor: pointer; 
+    }
+    .close:hover,
+    .close:focus {
+        color: red; 
+        text-decoration: none; 
+        cursor: pointer;
+    }
+
+    /* Hiệu ứng fade-in */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* Hiệu ứng slide-down */
+    @keyframes slideDown {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }

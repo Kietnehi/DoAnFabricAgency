@@ -8,28 +8,21 @@ if (!isset($_SESSION['user_id'])) {
 require 'connect.php';
 include 'nav.php'; // Bao gồm thanh điều hướng
 
-// Xử lý xóa đơn hàng
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_order_id'])) {
-    $order_id = $_POST['delete_order_id'];
-
-    // Xóa chi tiết đơn hàng
-    $conn->prepare("DELETE FROM order_detail WHERE OCode = :order_id")->execute(['order_id' => $order_id]);
-
-    // Xóa đơn hàng
-    $conn->prepare("DELETE FROM orders WHERE OCode = :order_id")->execute(['order_id' => $order_id]);
-}
-
 // Xử lý thanh toán đơn hàng
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay_order_id'])) {
     $order_id = $_POST['pay_order_id'];
     $payment_amount = floatval($_POST['payment_amount']);
 
-    // Lấy tổng tiền đơn hàng và số tiền đã thanh toán
-    $order_stmt = $conn->prepare("SELECT TotalPrice FROM orders WHERE OCode = :order_id");
+    // Lấy tổng tiền đơn hàng và thông tin khách hàng
+    $order_stmt = $conn->prepare("SELECT TotalPrice, CusId FROM orders WHERE OCode = :order_id");
     $order_stmt->execute(['order_id' => $order_id]);
-    $total_price = $order_stmt->fetchColumn();
+    $order = $order_stmt->fetch(PDO::FETCH_ASSOC);
 
-    $paid_stmt = $conn->prepare("SELECT COALESCE(SUM(Amount), 0) FROM customer_partialpayments WHERE CusId = (SELECT CusId FROM orders WHERE OCode = :order_id)");
+    $total_price = $order['TotalPrice'];
+    $cus_id = $order['CusId'];
+
+    // Lấy tổng tiền đã thanh toán cho đơn hàng này
+    $paid_stmt = $conn->prepare("SELECT COALESCE(SUM(Amount), 0) FROM customer_partialpayments WHERE OCode = :order_id");
     $paid_stmt->execute(['order_id' => $order_id]);
     $total_paid = $paid_stmt->fetchColumn();
 
@@ -38,16 +31,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay_order_id'])) {
     if ($payment_amount > $remaining_balance) {
         echo "<script>alert('Số tiền thanh toán vượt quá số dư. Vui lòng thử lại.');</script>";
     } else {
-        $cus_id_stmt = $conn->prepare("SELECT CusId FROM orders WHERE OCode = :order_id");
-        $cus_id_stmt->execute(['order_id' => $order_id]);
-        $cus_id = $cus_id_stmt->fetchColumn();
+        // Lưu lịch sử thanh toán vào bảng customer_partialpayments
+        $stmt = $conn->prepare("INSERT INTO customer_partialpayments (CusId, OCode, PaymentTime, Amount) VALUES (:cus_id, :order_id, NOW(), :amount)");
+        $stmt->execute(['cus_id' => $cus_id, 'order_id' => $order_id, 'amount' => $payment_amount]);
 
-        $stmt = $conn->prepare("INSERT INTO customer_partialpayments (CusId, PaymentTime, Amount) VALUES (:cus_id, NOW(), :amount)");
-        $stmt->execute(['cus_id' => $cus_id, 'amount' => $payment_amount]);
+        // Tính tổng số tiền đã thanh toán sau khi cập nhật
+        $new_total_paid = $total_paid + $payment_amount;
 
-        $new_status = ($payment_amount == $remaining_balance) ? 'paid' : 'partial_payment';
-        $status_stmt = $conn->prepare("UPDATE orders SET Status = :status WHERE OCode = :order_id");
-        $status_stmt->execute(['status' => $new_status, 'order_id' => $order_id]);
+        if ($new_total_paid == $total_price) {
+            // Nếu thanh toán đủ, cập nhật trạng thái thành `completed`
+            $status_stmt = $conn->prepare("UPDATE orders SET Status = 'completed' WHERE OCode = :order_id");
+            $status_stmt->execute(['order_id' => $order_id]);
+        } elseif ($new_total_paid < $total_price) {
+            // Nếu chưa thanh toán đủ, trạng thái là `partial_payment`
+            $status_stmt = $conn->prepare("UPDATE orders SET Status = 'partial_payment' WHERE OCode = :order_id");
+            $status_stmt->execute(['order_id' => $order_id]);
+        }
+
+        echo "<script>alert('Thanh toán thành công. Lịch sử đã được lưu.');</script>";
+    }
+}
+
+// Xử lý xóa đơn hàng
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_order_id'])) {
+    $order_id = $_POST['delete_order_id'];
+    $cancellation_reason = $_POST['cancellation_reason'];
+
+    // Kiểm tra xem đơn hàng có tồn tại không
+    $check_stmt = $conn->prepare("SELECT OCode FROM orders WHERE OCode = :order_id");
+    $check_stmt->execute(['order_id' => $order_id]);
+
+    if ($check_stmt->rowCount() > 0) {
+        // Lưu lý do hủy vào cơ sở dữ liệu và cập nhật trạng thái
+        $delete_stmt = $conn->prepare("
+            UPDATE orders 
+            SET Status = 'cancelled', Cancellation_Reason = :cancellation_reason 
+            WHERE OCode = :order_id
+        ");
+        $delete_stmt->execute([
+            'cancellation_reason' => $cancellation_reason,
+            'order_id' => $order_id
+        ]);
+
+        echo "<script>alert('Đơn hàng đã được hủy thành công.');</script>";
+    } else {
+        echo "<script>alert('Đơn hàng không tồn tại hoặc đã bị xóa.');</script>";
     }
 }
 
@@ -62,7 +90,8 @@ $offset = ($page - 1) * $limit;
 
 $sql = "SELECT orders.*, 
                customer.Fname AS customer_fname, customer.Lname AS customer_lname, 
-               employee.Fname AS emp_fname, employee.Lname AS emp_lname 
+               employee.Fname AS emp_fname, employee.Lname AS emp_lname,
+               COALESCE(orders.TotalPrice - (SELECT SUM(Amount) FROM customer_partialpayments WHERE OCode = orders.OCode), orders.TotalPrice) AS RemainingBalance
         FROM orders
         JOIN customer ON orders.CusId = customer.CusId
         JOIN employee ON orders.ECode = employee.ECode
@@ -91,6 +120,13 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
     <title>Quản lý Đơn Hàng</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="orders.css">
+    
+
+    <style>
+        .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
+        .modal-content { background-color: white; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; }
+        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+    </style>
     <script>
         function openPaymentModal(orderId, remainingBalance) {
             const amount = prompt(`Nhập số tiền thanh toán (tối đa $${remainingBalance.toFixed(2)}):`);
@@ -101,6 +137,15 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
             } else {
                 alert('Vui lòng nhập số tiền hợp lệ.');
             }
+        }
+
+        function openDeleteModal(orderId) {
+            document.getElementById('delete_order_id').value = orderId;
+            document.getElementById('deleteOrderModal').style.display = 'block';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteOrderModal').style.display = 'none';
         }
     </script>
 </head>
@@ -133,30 +178,27 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
             </tr>
             <?php if (!empty($orders)): ?>
                 <?php foreach ($orders as $order): ?>
-                    <?php
-                    // Lấy số tiền đã thanh toán
-                    $total_paid = $conn->query("SELECT COALESCE(SUM(Amount), 0) FROM customer_partialpayments WHERE CusId = " . $order['CusId'])->fetchColumn();
-                    $remaining_balance = $order['TotalPrice'] - $total_paid;
-                    ?>
-                    <tr>
-                        <td><?= $order['OCode']; ?></td>
-                        <td><?= htmlspecialchars($order['customer_fname'] . " " . $order['customer_lname']); ?></td>
-                        <td><?= htmlspecialchars($order['emp_fname'] . " " . $order['emp_lname']); ?></td>
-                        <td><?= htmlspecialchars($order['OrderTime']); ?></td>
-                        <td><?= htmlspecialchars(number_format($order['TotalPrice'], 2)); ?></td>
-                        <td><?= htmlspecialchars(number_format($remaining_balance, 2)); ?></td>
-                        <td><?= htmlspecialchars($order['Status']); ?></td>
-                        <td class="action-buttons">
-                            <a href="edit_order.php?id=<?= $order['OCode']; ?>" class="edit-btn">Sửa</a>
-                            <form method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa đơn hàng này?');" style="display:inline;">
-                                <input type="hidden" name="delete_order_id" value="<?= $order['OCode']; ?>">
-                                <button type="submit" class="delete-btn">Xóa</button>
-                            </form>
-                            <?php if ($order['Status'] !== 'paid'): ?>
-                                <button type="button" onclick="openPaymentModal(<?= $order['OCode']; ?>, <?= $remaining_balance; ?>)" class="pay-btn">Thanh toán</button>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
+                <tr>
+                    <td><?= $order['OCode']; ?></td>
+                    <td><?= htmlspecialchars($order['customer_fname'] . " " . $order['customer_lname']); ?></td>
+                    <td><?= htmlspecialchars($order['emp_fname'] . " " . $order['emp_lname']); ?></td>
+                    <td><?= htmlspecialchars($order['OrderTime']); ?></td>
+                    <td><?= htmlspecialchars(number_format($order['TotalPrice'], 2)); ?></td>
+                    <td><?= htmlspecialchars(number_format($order['RemainingBalance'], 2)); ?></td>
+                    <td>
+                        <?= $order['Status'] === 'cancelled' 
+                            ? '<span class="status-cancelled">Đã Hủy</span><br>Lý Do: ' . htmlspecialchars($order['Cancellation_Reason']) 
+                            : htmlspecialchars($order['Status']); 
+                        ?>
+                    </td>
+                    <td class="action-buttons">
+                        <a href="edit_order.php?id=<?= $order['OCode']; ?>" class="edit-btn">Sửa</a>
+                        <button type="button" onclick="openDeleteModal(<?= $order['OCode']; ?>)" class="delete-btn">Xóa</button>
+                        <?php if ($order['Status'] !== 'completed' && $order['Status'] !== 'cancelled'): ?>
+                            <button type="button" onclick="openPaymentModal(<?= $order['OCode']; ?>, <?= $order['RemainingBalance']; ?>)" class="pay-btn">Thanh toán</button>
+                        <?php endif; ?>
+                    </td>
+                </tr>
                 <?php endforeach; ?>
             <?php else: ?>
                 <tr>
@@ -169,6 +211,19 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
             <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                 <a href="?query=<?= htmlspecialchars($query) ?>&order_by=<?= htmlspecialchars($order_by) ?>&order_dir=<?= htmlspecialchars($order_dir) ?>&page=<?= $i ?>" class="<?= ($i == $page) ? 'active' : '' ?>"><?= $i ?></a>
             <?php endfor; ?>
+        </div>
+    </div>
+
+    <div id="deleteOrderModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeDeleteModal()">&times;</span>
+            <h2>Xóa Đơn Hàng</h2>
+            <form id="deleteOrderForm" method="POST">
+                <input type="hidden" name="delete_order_id" id="delete_order_id">
+                <label for="cancellation_reason">Lý Do Hủy Đơn:</label>
+                <textarea name="cancellation_reason" id="cancellation_reason" rows="4" required></textarea>
+                <button type="submit">Xác Nhận</button>
+            </form>
         </div>
     </div>
 </body>
