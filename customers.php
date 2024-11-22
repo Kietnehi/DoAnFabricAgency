@@ -45,12 +45,71 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
 
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <title>Quản lý Khách hàng</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="customer.css">
+    <link rel="stylesheet" href="customers.css">
+    <style>
+        /* Nút sửa (màu xanh lá) */
+        .btn-edit {
+            background: linear-gradient(to right, #28a745, #218838);
+            /* Gradient xanh lá */
+            color: white;
+            /* Màu chữ */
+            border: none;
+            /* Không viền */
+            padding: 8px 15px;
+            /* Khoảng cách bên trong */
+            font-size: 14px;
+            /* Kích thước chữ */
+            font-weight: bold;
+            /* Chữ đậm */
+            text-decoration: none;
+            /* Bỏ gạch chân */
+            border-radius: 5px;
+            /* Bo tròn góc */
+            cursor: pointer;
+            /* Hiệu ứng con trỏ */
+            transition: all 0.3s ease;
+            /* Hiệu ứng mượt mà */
+            margin-right: 5px;
+            /* Khoảng cách giữa các nút */
+        }
+
+        /* Hover cho nút sửa */
+        .btn-edit:hover {
+            background: linear-gradient(to right, #218838, #19692c);
+            /* Gradient đậm hơn */
+            transform: scale(1.05);
+            /* Phóng to nhẹ */
+        }
+
+        /* Nút xóa (màu đỏ) */
+        .btn-delete {
+            background: linear-gradient(to right, #dc3545, #c82333);
+            /* Gradient đỏ */
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        /* Hover cho nút xóa */
+        .btn-delete:hover {
+            background: linear-gradient(to right, #c82333, #a71d2a);
+            /* Gradient đậm hơn */
+            transform: scale(1.05);
+        }
+    </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Danh Sách Khách Hàng</h1>
@@ -58,7 +117,7 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
         <!-- Form tìm kiếm khách hàng -->
         <form method="GET" action="customers.php" class="search-bar">
             <input type="text" name="query" placeholder="Tìm theo tên hoặc số điện thoại..." value="<?= htmlspecialchars($query) ?>">
-            <button type="submit">Tìm kiếm</button>
+            <button type="submit"><i class="fa fa-search"></i> Tìm kiếm</button>
             <input type="hidden" name="order_by" value="<?= htmlspecialchars($order_by) ?>">
             <input type="hidden" name="order_dir" value="<?= htmlspecialchars($order_dir) ?>">
         </form>
@@ -66,11 +125,11 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
         <!-- Bảng hiển thị danh sách khách hàng -->
         <table>
             <tr>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=CusId&order_dir=<?= $new_order_dir ?>">ID</a></th>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Fname&order_dir=<?= $new_order_dir ?>">Tên</a></th>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Phone&order_dir=<?= $new_order_dir ?>">Số điện thoại</a></th>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Dept&order_dir=<?= $new_order_dir ?>">Công nợ</a></th>
-                <th>Nhân viên phụ trách</th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=CusId&order_dir=<?= $new_order_dir ?>"><i class="fas fa-sort"></i> ID</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Fname&order_dir=<?= $new_order_dir ?>"><i class="fas fa-sort"></i> Tên</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Phone&order_dir=<?= $new_order_dir ?>"><i class="fas fa-sort"></i> Số điện thoại</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Dept&order_dir=<?= $new_order_dir ?>"><i class="fas fa-sort"></i> Công nợ</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=EmployeeInfo&order_dir=<?= $new_order_dir ?>"><i class="fas fa-sort"></i> Nhân viên phụ trách</a></th>
                 <th>Hành động</th>
             </tr>
             <?php if (!empty($customers)): ?>
@@ -82,9 +141,10 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
                         <td><?= htmlspecialchars(number_format($customer['Dept'], 2)); ?> USD</td>
                         <td><?= htmlspecialchars($customer['EmployeeInfo'] ?? 'Không xác định'); ?></td>
                         <td>
-                            <a href="edit_customer.php?id=<?= $customer['CusId']; ?>">Sửa</a> |
-                            <a href="delete_customer.php?id=<?= $customer['CusId']; ?>" onclick="return confirm('Bạn có chắc chắn muốn xóa khách hàng này?');">Xóa</a>
+                            <a href="edit_customer.php?id=<?= $customer['CusId']; ?>" class="btn-edit">Sửa</a>
+                            <a href="delete_customer.php?id=<?= $customer['CusId']; ?>" class="btn-delete" onclick="return confirm('Bạn có chắc chắn muốn xóa khách hàng này?');">Xóa</a>
                         </td>
+
                     </tr>
                 <?php endforeach; ?>
             <?php else: ?>
@@ -102,4 +162,5 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
         </div>
     </div>
 </body>
+
 </html>

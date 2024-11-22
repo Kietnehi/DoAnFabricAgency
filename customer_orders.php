@@ -61,7 +61,7 @@ $orders = $order_stmt->fetchAll(PDO::FETCH_ASSOC);
                     </td>
                     <td>
                         <button class="toggle-btn" onclick="toggleDetails(<?= $order['order_id']; ?>)">
-                            Xem Chi Tiết
+                           <i class="fas fa-eye"></i> Xem
                         </button>
                     </td>
                     <td>

@@ -18,7 +18,7 @@ if (!isset($_SESSION['user_id'])) {
 <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container-fluid">
         <!-- Brand Logo -->
-        <a href="index.php" class="navbar-brand"><i class="fas fa-store"></i> GROUP.COM</a>
+        <a href="index.php" class="navbar-brand"><i class="fas fa-store"></i> GROUP5.COM</a>
 
         <!-- Mobile toggle button -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,10 +51,10 @@ if (!isset($_SESSION['user_id'])) {
             </ul>
 
             <!-- Social Icons -->
-            <div class="social-icons d-none d-lg-flex">
-                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i></a>
-                <a href="https://x.com" target="_blank"><i class="fab fa-twitter"></i></a>
-                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+            <div class="social-icons d-none d-lg-flex" style="margin: 10px;">
+                <a href="https://facebook.com" target="_blank" style="margin: 10px;"><i class="fab fa-facebook"></i></a>
+                <a href="https://x.com" target="_blank" style="margin: 10px;"><i class="fab fa-twitter"></i></a>
+                <a href="https://instagram.com" target="_blank" style="margin: 10px;"><i class="fab fa-instagram"></i></a>
             </div>
         </div>
     </div>

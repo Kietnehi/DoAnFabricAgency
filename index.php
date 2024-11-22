@@ -5,8 +5,8 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-include "nav.php";
 require 'connect.php';
+include "nav.php";
 
 // Xử lý lọc thời gian
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : null;
@@ -126,9 +126,9 @@ $outstanding_data = array_column($monthly_outstanding_data, 'outstanding');
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <link rel="stylesheet" href="style.css">
 
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="indexs.css">
 </head>
 
 <body>
@@ -171,7 +171,7 @@ $outstanding_data = array_column($monthly_outstanding_data, 'outstanding');
             <input type="text" name="start_date" id="start_date" class="form-control" value="<?php echo htmlspecialchars($start_date); ?>" placeholder="yyyy-mm-dd">
             <label for="end_date">Đến ngày:</label>
             <input type="text" name="end_date" id="end_date" class="form-control" value="<?php echo htmlspecialchars($end_date); ?>" placeholder="yyyy-mm-dd">
-            <button type="submit" class="btn btn-primary">Lọc</button>
+            <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-filter"></i>Lọc</button>
         </form>
         <div class="notifications">
             <h3>Thông Báo</h3>

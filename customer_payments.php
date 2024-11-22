@@ -93,12 +93,54 @@ $customers = $conn->query("SELECT CusId, Fname, Lname, Dept FROM customer")->fet
 
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <title>Quản lý Thanh Toán Khách Hàng</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="customer_payment.css">
+    <link rel="stylesheet" href="customer_payments.css">
+    <style>
+        .detail-btn {
+            background: linear-gradient(to right, #007bff, #00d4ff); /* Gradient xanh dương */
+            color: white;
+            /* Màu chữ */
+            border: none;
+            /* Loại bỏ viền */
+            padding: 8px 15px;
+            /* Khoảng cách bên trong */
+            font-size: 14px;
+            /* Kích thước chữ */
+            font-weight: bold;
+            /* Chữ đậm */
+            border-radius: 5px;
+            /* Bo tròn góc */
+            cursor: pointer;
+            /* Con trỏ chuột */
+            transition: all 0.3s ease;
+            /* Hiệu ứng mượt mà */
+            display: flex;
+            /* Canh icon và text */
+            align-items: center;
+            /* Căn giữa theo trục dọc */
+            gap: 5px;
+            /* Khoảng cách giữa icon và text */
+        }
+
+        .detail-btn:hover {
+            background: linear-gradient(to right, #0056b3, #009fbf); /* Gradient xanh đậm hơn */
+            transform: scale(1.05);
+            /* Phóng to nhẹ khi hover */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            /* Tạo bóng khi hover */
+        }
+
+        .detail-btn i {
+            font-size: 16px;
+            /* Kích thước icon */
+        }
+    </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Danh Sách Thanh Toán Khách Hàng</h1>
@@ -107,25 +149,28 @@ $customers = $conn->query("SELECT CusId, Fname, Lname, Dept FROM customer")->fet
             <tr>
                 <th>
                     <a href="?order_by=CusId&order_dir=<?= ($order_by === 'CusId' && $order_dir === 'asc') ? 'desc' : 'asc' ?>">
-                        Mã Khách Hàng
+                        <i class="fas fa-sort"></i> Mã Khách Hàng
                     </a>
                 </th>
                 <th>
                     <a href="?order_by=Fname&order_dir=<?= ($order_by === 'Fname' && $order_dir === 'asc') ? 'desc' : 'asc' ?>">
-                        Khách Hàng
+                        <i class="fas fa-sort"></i> Khách Hàng
                     </a>
                 </th>
                 <th>
                     <a href="?order_by=PaymentTime&order_dir=<?= ($order_by === 'PaymentTime' && $order_dir === 'asc') ? 'desc' : 'asc' ?>">
-                        Ngày Thanh Toán
+                        <i class="fas fa-sort"></i> Ngày Thanh Toán
                     </a>
                 </th>
                 <th>
                     <a href="?order_by=Amount&order_dir=<?= ($order_by === 'Amount' && $order_dir === 'asc') ? 'desc' : 'asc' ?>">
-                        Số Tiền (USD)
+                        <i class="fas fa-sort"></i> Số Tiền (USD)
                     </a>
                 </th>
-                <th>Trạng Thái Đơn Hàng</th>
+                <th>
+                    <a href="?order_by=Status&order_dir=<?= ($order_by === 'Status' && $order_dir === 'asc') ? 'desc' : 'asc' ?>">
+                        <i class="fas fa-sort"></i> Trạng Thái Đơn hàng
+                </th>
                 <th>Thao Tác</th>
             </tr>
             <?php if (!empty($payments)): ?>
@@ -143,7 +188,9 @@ $customers = $conn->query("SELECT CusId, Fname, Lname, Dept FROM customer")->fet
                         <td>$<?= htmlspecialchars(number_format($payment['Amount'], 2)); ?> USD</td>
                         <td><?= $order_status === 'completed' ? 'Đã Hoàn Thành' : 'Chưa Hoàn Thành'; ?></td>
                         <td>
-                            <a href="customer_orders.php?customer_id=<?= htmlspecialchars($payment['CusId']); ?>">Xem Chi Tiết</a>
+                            <button class="detail-btn" onclick="window.location.href='customer_orders.php?customer_id=<?= htmlspecialchars($payment['CusId']); ?>'">
+                                <i class="fas fa-info-circle"></i> Xem Chi Tiết
+                            </button>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -220,4 +267,5 @@ $customers = $conn->query("SELECT CusId, Fname, Lname, Dept FROM customer")->fet
         </script>
     </div>
 </body>
+
 </html>

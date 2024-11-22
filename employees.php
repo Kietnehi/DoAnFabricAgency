@@ -48,7 +48,7 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
     <meta charset="UTF-8">
     <title>Quản lý Nhân viên</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="employee.css">
+    <link rel="stylesheet" href="employees.css">
 </head>
 
 <body>
@@ -58,7 +58,7 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
         <!-- Form tìm kiếm nhân viên -->
         <form method="GET" action="employees.php" class="search-bar">
             <input type="text" name="query" placeholder="Tìm theo tên hoặc số điện thoại..." value="<?= htmlspecialchars($query) ?>">
-            <button type="submit">Tìm kiếm</button>
+            <button type="submit"><i class="fa fa-search"></i>Tìm kiếm</button>
             <input type="hidden" name="order_by" value="<?= htmlspecialchars($order_by) ?>">
             <input type="hidden" name="order_dir" value="<?= htmlspecialchars($order_dir) ?>">
         </form>

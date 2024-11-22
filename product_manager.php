@@ -160,7 +160,7 @@ include 'nav.php';
         }
 
         .search-container {
-            margin-bottom: 20px;
+            margin: 30px;
             text-align: center;
         }
 
@@ -217,15 +217,14 @@ include 'nav.php';
 </head>
 
 <body>
-
+    
+    <h2>Danh sách sản phẩm</h2>
     <div class="search-container">
         <form method="GET" action="product_manager.php">
             <input type="text" name="search" value="<?= htmlspecialchars($search); ?>" placeholder="Nhập mã, tên sản phẩm hoặc nhà cung cấp...">
             <button type="submit">Tìm kiếm</button>
         </form>
     </div>
-
-    <h2>Danh sách sản phẩm</h2>
     <a href="add_fabric_types.php?CCode=" class="btn-add"><i class="fas fa-plus"></i>Thêm sản phẩm</a>
     <table>
         <thead>

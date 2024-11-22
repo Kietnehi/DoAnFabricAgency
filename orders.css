@@ -24,7 +24,7 @@ h1 {
 
 .search-bar {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     margin-bottom: 20px;
 }
 
@@ -38,18 +38,20 @@ h1 {
 }
 
 .search-bar button {
-    background-color: #333;
-    color: white;
+    background: linear-gradient(to right, #6a11cb, #2575fc); /* Gradient tím - xanh ngọc */
+    color: white; /* Chữ trắng nổi bật */
     border: none;
     padding: 8px 16px;
-    margin-left: 10px;
+    margin-left: 2px;
     cursor: pointer;
     border-radius: 5px;
-    transition: 0.3s;
+    transition: background-color 0.3s, transform 0.2s; /* Hiệu ứng mượt mà */
 }
 
 .search-bar button:hover {
-    background-color: #555;
+    background: linear-gradient(to right, #4a0d99, #1b57cc); /* Gradient đậm hơn khi hover */
+    color: #f5f5f5; /* Màu chữ hơi sáng hơn */
+    transform: scale(1.05); /* Nút lớn hơn một chút khi hover */
 }
 
 table {
@@ -67,6 +69,11 @@ th {
     background-color: #333;
     color: white;
     cursor: pointer;
+}
+
+th a {
+    text-decoration: none;
+    color: white;
 }
 
 tr:nth-child(even) {
