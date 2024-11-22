@@ -26,7 +26,7 @@ try {
     <meta charset="UTF-8">
     <title>Thống Kê Doanh Thu Bán Hàng</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="sales_statistics.css">
+    <link rel="stylesheet" href="sales_statistic.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>

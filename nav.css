@@ -54,6 +54,7 @@
     .navbar-toggler:hover {
         transform: rotate(180deg);
     }
+    
     .action-buttons .nav-link {
         background-color: #ffc107;
         color: #212529 !important;

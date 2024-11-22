@@ -48,7 +48,7 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
     <meta charset="UTF-8">
     <title>Quản lý Nhân viên</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="employees.css">
+    <link rel="stylesheet" href="employee.css">
 </head>
 
 <body>

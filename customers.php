@@ -49,7 +49,7 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
     <meta charset="UTF-8">
     <title>Quản lý Khách hàng</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="customers.css">
+    <link rel="stylesheet" href="customer.css">
 </head>
 <body>
     <div class="container">

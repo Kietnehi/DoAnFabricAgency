@@ -12,6 +12,7 @@ if (!isset($_SESSION['user_id'])) {
 <!-- Bootstrap 5 CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 <link rel="stylesheet" href="nav.css">
 
 <nav class="navbar navbar-expand-lg navbar-dark">
@@ -37,13 +38,6 @@ if (!isset($_SESSION['user_id'])) {
                 <li class="nav-item"><a class="nav-link" href="employees.php"><i class="fas fa-user-tie"></i> Nhân viên</a></li>
             </ul>
 
-            <!-- Social Icons -->
-            <div class="social-icons d-none d-lg-flex">
-                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i></a>
-                <a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
-                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
-            </div>
-
             <!-- Action Buttons -->
             <div class="action-buttons d-flex">
                 <a class="nav-link" href="add_customer.php"><i class="fas fa-user-plus"></i> Thêm Khách hàng</a>
@@ -53,15 +47,15 @@ if (!isset($_SESSION['user_id'])) {
             <!-- User Menu -->
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-user-circle"></i> <?php echo htmlspecialchars($_SESSION['username']); ?></a></li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-user-cog"></i> Tài khoản
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="logout.php"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></li>
-                    </ul>
-                </li>
+                <li class="nav-item"><a class="nav-link" href="logout.php"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></li>
             </ul>
+
+            <!-- Social Icons -->
+            <div class="social-icons d-none d-lg-flex">
+                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i></a>
+                <a href="https://x.com" target="_blank"><i class="fab fa-twitter"></i></a>
+                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+            </div>
         </div>
     </div>
 </nav>

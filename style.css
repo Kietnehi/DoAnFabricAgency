@@ -1,7 +1,8 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    color: #333;
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7fc;
+    margin: 0;
+    padding: 0;
 }
 
 table {
@@ -53,7 +54,8 @@ button {
     color: white;
     border: none;
     cursor: pointer;
-}/* Định dạng thanh điều hướng */
+}
+/* Định dạng thanh điều hướng */
 .navbar {
     background-color: #333;
     padding: 10px 20px;

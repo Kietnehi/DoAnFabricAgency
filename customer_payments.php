@@ -97,7 +97,7 @@ $customers = $conn->query("SELECT CusId, Fname, Lname, Dept FROM customer")->fet
     <meta charset="UTF-8">
     <title>Quản lý Thanh Toán Khách Hàng</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="customer_payments.css">
+    <link rel="stylesheet" href="customer_payment.css">
 </head>
 <body>
     <div class="container">
