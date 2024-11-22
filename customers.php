@@ -10,7 +10,7 @@ include 'nav.php'; // Bao gồm thanh điều hướng
 
 // Xử lý tìm kiếm và sắp xếp
 $query = isset($_GET['query']) ? $_GET['query'] : '';
-$order_by = isset($_GET['order_by']) ? $_GET['order_by'] : 'customer_id';
+$order_by = isset($_GET['order_by']) ? $_GET['order_by'] : 'CusId';
 $order_dir = isset($_GET['order_dir']) && $_GET['order_dir'] === 'desc' ? 'desc' : 'asc';
 
 // Thiết lập phân trang
@@ -18,8 +18,14 @@ $limit = 10; // Số bản ghi mỗi trang
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
-// Chuẩn bị câu truy vấn SQL cho tìm kiếm và sắp xếp có phân trang
-$sql = "SELECT * FROM Customers WHERE first_name LIKE :query OR last_name LIKE :query OR phone LIKE :query ORDER BY $order_by $order_dir LIMIT :limit OFFSET :offset";
+// Chuẩn bị câu truy vấn SQL cho tìm kiếm, sắp xếp, và liên kết bảng
+$sql = "SELECT c.CusId, c.Fname, c.Lname, c.Phone, c.Address, c.Dept, c.ECode,
+        CONCAT('NV ', e.ECode, ' - ', e.Fname, ' ', e.Lname) AS EmployeeInfo
+        FROM customer c
+        LEFT JOIN employee e ON c.ECode = e.ECode
+        WHERE c.Fname LIKE :query OR c.Lname LIKE :query OR c.Phone LIKE :query
+        ORDER BY $order_by $order_dir
+        LIMIT :limit OFFSET :offset";
 $stmt = $conn->prepare($sql);
 $stmt->bindValue(':query', "%$query%", PDO::PARAM_STR);
 $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
@@ -28,7 +34,7 @@ $stmt->execute();
 $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Đếm tổng số bản ghi để tính tổng số trang
-$total_stmt = $conn->prepare("SELECT COUNT(*) FROM Customers WHERE first_name LIKE :query OR last_name LIKE :query OR phone LIKE :query");
+$total_stmt = $conn->prepare("SELECT COUNT(*) FROM customer WHERE Fname LIKE :query OR Lname LIKE :query OR Phone LIKE :query");
 $total_stmt->execute([':query' => "%$query%"]);
 $total_rows = $total_stmt->fetchColumn();
 $total_pages = ceil($total_rows / $limit);
@@ -43,142 +49,7 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
     <meta charset="UTF-8">
     <title>Quản lý Khách hàng</title>
     <link rel="stylesheet" href="styles.css">
-    <style>
-        /* Đặt kiểu nền và phông chữ */
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f9;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-
-        /* Tạo container cho trang */
-        .container {
-            max-width: 900px;
-            width: 100%;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Style cho tiêu đề */
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        /* Style cho thanh tìm kiếm */
-        .search-bar {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .search-bar input[type="text"] {
-            padding: 8px;
-            width: 100%;
-            max-width: 400px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            outline: none;
-        }
-
-        .search-bar button {
-            background-color: #333;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            margin-left: 10px;
-            cursor: pointer;
-            border-radius: 5px;
-            transition: 0.3s;
-        }
-
-        .search-bar button:hover {
-            background-color: #555;
-        }
-
-        /* Style cho bảng */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #333;
-            color: white;
-            cursor: pointer;
-        }
-
-        /* Style cho các hàng trong bảng */
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        /* Style cho các nút hành động */
-        .action-buttons a {
-            padding: 6px 12px;
-            margin: 2px;
-            border-radius: 5px;
-            text-decoration: none;
-            color: white;
-            transition: 0.2s;
-        }
-
-        .edit-btn {
-            background-color: #4CAF50;
-        }
-
-        .edit-btn:hover {
-            background-color: #45a049;
-        }
-
-        .delete-btn {
-            background-color: #f44336;
-        }
-
-        .delete-btn:hover {
-            background-color: #d32f2f;
-        }
-
-        /* Style cho phân trang */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        .pagination a {
-            color: #333;
-            padding: 8px 12px;
-            margin: 0 4px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            text-decoration: none;
-            transition: 0.3s;
-        }
-
-        .pagination a:hover {
-            background-color: #333;
-            color: #fff;
-        }
-
-        .pagination a.active {
-            background-color: #007bff;
-            color: white;
-            border: 1px solid #007bff;
-        }
-    </style>
+    <link rel="stylesheet" href="customers.css">
 </head>
 <body>
     <div class="container">
@@ -195,34 +66,24 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
         <!-- Bảng hiển thị danh sách khách hàng -->
         <table>
             <tr>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=customer_id&order_dir=<?= $new_order_dir ?>">ID</a></th>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=first_name&order_dir=<?= $new_order_dir ?>">Tên</a></th>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=phone&order_dir=<?= $new_order_dir ?>">Số điện thoại</a></th>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=outstanding_balance&order_dir=<?= $new_order_dir ?>">Công nợ</a></th>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=warning_status&order_dir=<?= $new_order_dir ?>">Trạng thái</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=CusId&order_dir=<?= $new_order_dir ?>">ID</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Fname&order_dir=<?= $new_order_dir ?>">Tên</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Phone&order_dir=<?= $new_order_dir ?>">Số điện thoại</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Dept&order_dir=<?= $new_order_dir ?>">Công nợ</a></th>
+                <th>Nhân viên phụ trách</th>
                 <th>Hành động</th>
             </tr>
             <?php if (!empty($customers)): ?>
                 <?php foreach ($customers as $customer): ?>
                     <tr>
-                        <td><?= $customer['customer_id']; ?></td>
-                        <td><?= htmlspecialchars($customer['first_name'] . " " . $customer['last_name']); ?></td>
-                        <td><?= htmlspecialchars($customer['phone']); ?></td>
-                        <td><?= htmlspecialchars($customer['outstanding_balance']); ?></td>
+                        <td><?= htmlspecialchars($customer['CusId']); ?></td>
+                        <td><?= htmlspecialchars($customer['Fname'] . " " . $customer['Lname']); ?></td>
+                        <td><?= htmlspecialchars($customer['Phone']); ?></td>
+                        <td><?= htmlspecialchars(number_format($customer['Dept'], 2)); ?> USD</td>
+                        <td><?= htmlspecialchars($customer['EmployeeInfo'] ?? 'Không xác định'); ?></td>
                         <td>
-                            <?php 
-                            if ($customer['bad_debt_status']) {
-                                echo '<span style="color: red;">Nợ xấu</span>';
-                            } elseif ($customer['warning_status']) {
-                                echo '<span style="color: orange;">Cảnh báo</span>';
-                            } else {
-                                echo 'Bình thường';
-                            }
-                            ?>
-                        </td>
-                        <td class="action-buttons">
-                            <a href="edit_customer.php?id=<?= $customer['customer_id']; ?>" class="edit-btn">Sửa</a>
-                            <a href="delete_customer.php?id=<?= $customer['customer_id']; ?>" class="delete-btn" onclick="return confirm('Bạn có chắc chắn muốn xóa?');">Xóa</a>
+                            <a href="edit_customer.php?id=<?= $customer['CusId']; ?>">Sửa</a> |
+                            <a href="delete_customer.php?id=<?= $customer['CusId']; ?>" onclick="return confirm('Bạn có chắc chắn muốn xóa khách hàng này?');">Xóa</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -233,7 +94,7 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
             <?php endif; ?>
         </table>
 
-        <!-- Hiển thị phân trang -->
+        <!-- Phân trang -->
         <div class="pagination">
             <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                 <a href="?query=<?= htmlspecialchars($query) ?>&order_by=<?= htmlspecialchars($order_by) ?>&order_dir=<?= htmlspecialchars($order_dir) ?>&page=<?= $i ?>" class="<?= ($i == $page) ? 'active' : '' ?>"><?= $i ?></a>

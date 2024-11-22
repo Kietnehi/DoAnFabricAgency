@@ -9,8 +9,8 @@ include "connect.php"; // Ensure database connection
 include "nav.php";
 
 try {
-    // Calculate total revenue from paid orders
-    $stmt = $conn->prepare("SELECT SUM(total_amount) as total_revenue FROM orders WHERE status = 'paid'");
+    // Calculate total revenue from completed orders
+    $stmt = $conn->prepare("SELECT SUM(TotalPrice) as total_revenue FROM orders WHERE Status = 'Completed'");
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     $totalRevenue = $result['total_revenue'] ?? 0;
@@ -26,96 +26,8 @@ try {
     <meta charset="UTF-8">
     <title>Thống Kê Doanh Thu Bán Hàng</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="sales_statistics.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        /* Styling for the statistics page */
-        body {
-            font-family: Arial, sans-serif;
-            background: #f0f2f5;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .container {
-            max-width: 900px;
-            width: 100%;
-            background: #fff;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-        }
-        .filter-form {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 20px;
-            justify-content: center;
-            align-items: center;
-        }
-        .filter-form input[type="date"], .filter-form button {
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            transition: border-color 0.3s;
-        }
-        .filter-form input[type="date"]:focus {
-            border-color: #007bff;
-        }
-        .quick-filter button {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .quick-filter button:hover {
-            background-color: #0056b3;
-        }
-        .chart-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 30px;
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            animation: fadeIn 0.6s ease;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .total-revenue {
-            font-size: 18px;
-            color: #28a745;
-            font-weight: bold;
-            margin-top: 10px;
-            text-align: center;
-        }
-        canvas {
-            max-width: 400px;
-            max-height: 200px;
-            width: 100%;
-            height: auto;
-        }
-        .message {
-            color: #ff6b6b;
-            font-weight: bold;
-            text-align: center;
-            margin-top: 20px;
-        }
-    </style>
 </head>
 <body>
     <div class="container">
@@ -162,27 +74,66 @@ try {
         function renderCharts(data) {
             document.getElementById('noDataMessage').style.display = data.has_data ? 'none' : 'block';
 
-            const monthlyLabels = data.monthly_revenue.map(item => item.month);
-            const monthlyData = data.monthly_revenue.map(item => item.revenue);
+// Dữ liệu và nhãn cho biểu đồ doanh thu theo tháng
+const monthlyLabels = data.monthly_revenue.map(item => item.month);
+const monthlyData = data.monthly_revenue.map(item => parseFloat(item.revenue));
 
-            if (monthlyRevenueChart) monthlyRevenueChart.destroy();
-            monthlyRevenueChart = new Chart(document.getElementById('monthlyRevenueChart'), {
-                type: 'line',
-                data: {
-                    labels: monthlyLabels,
-                    datasets: [{
-                        label: 'Doanh Thu (USD)',
-                        data: monthlyData,
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        fill: false,
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: { y: { beginAtZero: true } }
+if (monthlyRevenueChart) monthlyRevenueChart.destroy(); // Hủy biểu đồ trước đó nếu có
+
+// Biểu đồ tuyến (line chart) cho doanh thu theo tháng
+monthlyRevenueChart = new Chart(document.getElementById('monthlyRevenueChart'), {
+    type: 'line',
+    data: {
+        labels: monthlyLabels,
+        datasets: [{
+            label: 'Doanh Thu (USD)',
+            data: monthlyData,
+            borderColor: 'rgba(75, 192, 192, 1)', // Đường màu xanh dương
+            backgroundColor: 'rgba(75, 192, 192, 0.2)', // Vùng tô mờ
+            pointBackgroundColor: 'rgba(75, 192, 192, 1)', // Điểm dữ liệu màu xanh
+            pointRadius: 5, // Kích thước điểm dữ liệu
+            borderWidth: 2 // Độ rộng đường
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    label: function (context) {
+                        return `Doanh thu: $${context.raw.toFixed(2)}`;
+                    }
                 }
-            });
+            }
+        },
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: 'Tháng',
+                    font: {
+                        size: 14
+                    }
+                }
+            },
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Doanh Thu (USD)',
+                    font: {
+                        size: 14
+                    }
+                },
+                ticks: {
+                    callback: function (value) {
+                        return `$${value}`;
+                    }
+                }
+            }
+        }
+    }
+});
 
             const fabricLabels = data.fabric_revenue.map(item => item.fabric_name);
             const fabricData = data.fabric_revenue.map(item => item.revenue);

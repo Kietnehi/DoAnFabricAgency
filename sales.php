@@ -2,13 +2,15 @@
 require 'connect.php';
 
 // Lấy danh sách khách hàng và nhân viên
-$customers = $conn->query("SELECT customer_id, first_name, last_name FROM Customers")->fetchAll(PDO::FETCH_ASSOC);
-$employees = $conn->query("SELECT employee_id, first_name, last_name FROM Employees")->fetchAll(PDO::FETCH_ASSOC);
+$customers = $conn->query("SELECT CusId, Fname, Lname FROM customer")->fetchAll(PDO::FETCH_ASSOC);
+$employees = $conn->query("SELECT ECode, Fname, Lname FROM employee")->fetchAll(PDO::FETCH_ASSOC);
 
 // Lấy danh sách các cuộn vải có trong kho
-$fabric_rolls = $conn->query("SELECT Fabric_Rolls.roll_id, Fabric_Types.name AS fabric_name, Fabric_Rolls.length 
-                              FROM Fabric_Rolls 
-                              JOIN Fabric_Types ON Fabric_Rolls.fabric_type_id = Fabric_Types.fabric_type_id")->fetchAll(PDO::FETCH_ASSOC);
+$fabric_bolts = $conn->query("
+    SELECT bolt.BCode, category.Name AS fabric_name, bolt.Length 
+    FROM bolt 
+    JOIN category ON bolt.CCode = category.CCode
+")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -25,8 +27,8 @@ $fabric_rolls = $conn->query("SELECT Fabric_Rolls.roll_id, Fabric_Types.name AS 
         <label for="customer_id">Khách Hàng:</label>
         <select name="customer_id" required>
             <?php foreach ($customers as $customer): ?>
-                <option value="<?= $customer['customer_id']; ?>">
-                    <?= $customer['first_name'] . " " . $customer['last_name']; ?>
+                <option value="<?= $customer['CusId']; ?>">
+                    <?= $customer['Fname'] . " " . $customer['Lname']; ?>
                 </option>
             <?php endforeach; ?>
         </select>
@@ -35,17 +37,17 @@ $fabric_rolls = $conn->query("SELECT Fabric_Rolls.roll_id, Fabric_Types.name AS 
         <label for="employee_id">Nhân Viên:</label>
         <select name="employee_id" required>
             <?php foreach ($employees as $employee): ?>
-                <option value="<?= $employee['employee_id']; ?>">
-                    <?= $employee['first_name'] . " " . $employee['last_name']; ?>
+                <option value="<?= $employee['ECode']; ?>">
+                    <?= $employee['Fname'] . " " . $employee['Lname']; ?>
                 </option>
             <?php endforeach; ?>
         </select>
 
         <!-- Chọn các cuộn vải -->
         <h2>Chọn Cuộn Vải</h2>
-        <?php foreach ($fabric_rolls as $roll): ?>
-            <input type="checkbox" name="fabric_rolls[]" value="<?= $roll['roll_id']; ?>">
-            <?= $roll['fabric_name']; ?> - Dài: <?= $roll['length']; ?> mét <br>
+        <?php foreach ($fabric_bolts as $bolt): ?>
+            <input type="checkbox" name="fabric_bolts[]" value="<?= $bolt['BCode']; ?>">
+            <?= $bolt['fabric_name']; ?> - Dài: <?= $bolt['Length']; ?> mét <br>
         <?php endforeach; ?>
 
         <label for="total_amount">Tổng Tiền:</label>

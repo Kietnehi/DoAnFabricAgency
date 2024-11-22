@@ -11,19 +11,23 @@ include 'nav.php'; // Thanh điều hướng
 
 // Kiểm tra nếu form đã được gửi
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $first_name = $_POST['first_name'];
-    $last_name = $_POST['last_name'];
+    $fname = $_POST['fname'];
+    $lname = $_POST['lname'];
     $gender = $_POST['gender'];
     $address = $_POST['address'];
     $phone = $_POST['phone'];
     $role = $_POST['role'];
 
-    // Thêm thông tin nhân viên mới vào cơ sở dữ liệu
-    $stmt = $conn->prepare("INSERT INTO employees (first_name, last_name, gender, address, phone, role) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$first_name, $last_name, $gender, $address, $phone, $role]);
+    try {
+        // Thêm thông tin nhân viên mới vào cơ sở dữ liệu
+        $stmt = $conn->prepare("INSERT INTO employee (Fname, Lname, Gender, Address, Phone, Role) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$fname, $lname, $gender, $address, $phone, $role]);
 
-    header("Location: employees.php"); // Chuyển hướng về trang danh sách nhân viên
-    exit();
+        header("Location: employees.php"); // Chuyển hướng về trang danh sách nhân viên
+        exit();
+    } catch (PDOException $e) {
+        echo "Lỗi: " . $e->getMessage();
+    }
 }
 ob_end_flush();
 ?>
@@ -40,18 +44,18 @@ ob_end_flush();
         <h2>Thêm Nhân Viên Mới</h2>
         <form action="add_employee.php" method="POST">
             <div class="form-group">
-                <label for="first_name">Tên:</label>
-                <input type="text" class="form-control" id="first_name" name="first_name" required>
+                <label for="fname">Tên:</label>
+                <input type="text" class="form-control" id="fname" name="fname" required>
             </div>
             <div class="form-group">
-                <label for="last_name">Họ:</label>
-                <input type="text" class="form-control" id="last_name" name="last_name" required>
+                <label for="lname">Họ:</label>
+                <input type="text" class="form-control" id="lname" name="lname" required>
             </div>
             <div class="form-group">
                 <label for="gender">Giới Tính:</label>
                 <select class="form-control" id="gender" name="gender" required>
-                    <option value="Nam">Nam</option>
-                    <option value="Nữ">Nữ</option>
+                    <option value="Male">Nam</option>
+                    <option value="Female">Nữ</option>
                 </select>
             </div>
             <div class="form-group">
@@ -66,9 +70,9 @@ ob_end_flush();
                 <label for="role">Chức Vụ:</label>
                 <select class="form-control" id="role" name="role" required>
                     <option value="Manager">Quản lý</option>
-                    <option value="Partner">Đối tác</option>
-                    <option value="Operations">Hoạt động</option>
-                    <option value="Office">Văn phòng</option>
+                    <option value="PartnerStaff">Đối tác</option>
+                    <option value="OperationalStaff">Hoạt động</option>
+                    <option value="OfficeStaff">Văn phòng</option>
                 </select>
             </div>
             <button type="submit" class="btn btn-primary">Thêm Nhân Viên</button>

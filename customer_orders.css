@@ -1,0 +1,85 @@
+            body {
+                font-family: Arial, sans-serif;
+                background: #f4f7fb;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px;
+            }
+            .container {
+                max-width: 900px;
+                width: 100%;
+                padding: 20px;
+                border-radius: 12px;
+                box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+                background: #fff;
+            }
+            h1 {
+                color: #333;
+                text-align: center;
+                margin-bottom: 30px;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 20px;
+                background: #f9f9f9;
+            }
+            th, td {
+                padding: 12px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+            }
+            th {
+                background-color: #007bff;
+                color: white;
+            }
+            tr:nth-child(even) {
+                background-color: #f4f4f4;
+            }
+            .no-data {
+                text-align: center;
+                font-style: italic;
+                color: #888;
+            }
+            .toggle-btn {
+                background: #007bff;
+                color: #fff;
+                border: none;
+                padding: 8px 12px;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+            .toggle-btn:hover {
+                background-color: #0056b3;
+            }
+            .details-container {
+                display: none;
+                margin-top: 10px;
+                background: #f0f0f0;
+                padding: 10px;
+                border-radius: 8px;
+                animation: fadeIn 0.3s ease-in-out;
+            }
+            .nested-table {
+                width: 100%;
+                margin-top: 10px;
+                border: none;
+                background: none;
+            }
+            .nested-table th, .nested-table td {
+                padding: 8px;
+                text-align: left;
+                border: none;
+                background: #f7f7f7;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .status-paid { color: #28a745; font-weight: bold; }
+            .status-new { color: #ffc107; font-weight: bold; }
+            .status-partial_payment { color: #17a2b8; font-weight: bold; }
+            .status-ordered { color: #6c757d; font-weight: bold; }
+            .status-cancelled { color: #dc3545; font-weight: bold; }

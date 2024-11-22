@@ -12,47 +12,46 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $fabricPrice = $_POST['fabric_price'];
     $fabricQuantity = $_POST['fabric_quantity'];
     $supplierId = $_POST['supplier_id'];
-    $priceEffectiveDate = $_POST['price_effective_date']; // Ngày hiệu lực giá
+    $appliedDate = $_POST['applied_date'];
 
     // Xử lý hình ảnh
     if (isset($_FILES['product_image']) && $_FILES['product_image']['error'] == 0) {
         $uploadDir = 'img/'; // Thư mục lưu trữ hình ảnh
         $imageName = basename($_FILES['product_image']['name']);
         $uploadFile = $uploadDir . $imageName;
-        $uploadFile2 = $imageName;
 
         // Kiểm tra loại tệp
         $fileType = strtolower(pathinfo($uploadFile, PATHINFO_EXTENSION));
         if (in_array($fileType, ['jpg', 'jpeg', 'png', 'gif'])) {
             if (move_uploaded_file($_FILES['product_image']['tmp_name'], $uploadFile)) {
-                $imagePath = $uploadFile2;
+                $imagePath = $imageName; // Lưu tên tệp hình ảnh
             } else {
-                $imagePath = ''; // Nếu không tải được hình ảnh, để trống
-            }   
+                $imagePath = null; // Nếu không tải được hình ảnh, để trống
+            }
         } else {
-            $imagePath = ''; // Nếu không đúng định dạng
+            $imagePath = null; // Nếu không đúng định dạng
         }
     } else {
-        $imagePath = ''; // Nếu không có hình ảnh
+        $imagePath = null; // Nếu không có hình ảnh
     }
 
     // Kiểm tra và chèn vào cơ sở dữ liệu
     if ($fabricName && $fabricPrice && $fabricQuantity && $supplierId) {
         try {
-            // Thêm dữ liệu vào bảng fabric_types
-            $stmt = $conn->prepare("INSERT INTO fabric_types (name, color, current_price, price_effective_date, quantity, supplier_id, image) 
+            // Thêm dữ liệu vào bảng category
+            $stmt = $conn->prepare("INSERT INTO category (Name, Color, Price, AppliedDate, RemainQuantity, SCode, img) 
                                     VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$fabricName, $fabricColor, $fabricPrice, $priceEffectiveDate, $fabricQuantity, $supplierId, $imagePath]);
-            
-            // Lấy ID của loại vải vừa được thêm
-            $fabricTypeId = $conn->lastInsertId();
+            $stmt->execute([$fabricName, $fabricColor, $fabricPrice, $appliedDate, $fabricQuantity, $supplierId, $imagePath]);
 
-            // Thêm cuộn vải vào bảng fabric_rolls
+            // Lấy CCode của sản phẩm vừa được thêm
+            $CCode = $conn->lastInsertId();
+
+            // Thêm các cuộn vải vào bảng bolt
             if (isset($_POST['roll_lengths'])) {
                 foreach ($_POST['roll_lengths'] as $rollLength) {
                     if (is_numeric($rollLength) && $rollLength > 0) {
-                        $stmt = $conn->prepare("INSERT INTO fabric_rolls (fabric_type_id, length) VALUES (?, ?)");
-                        $stmt->execute([$fabricTypeId, $rollLength]);
+                        $stmt = $conn->prepare("INSERT INTO bolt (Length, CCode) VALUES (?, ?)");
+                        $stmt->execute([$rollLength, $CCode]);
                     }
                 }
             }
@@ -72,137 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Thêm Sản Phẩm</title>
-    <style>
-        /* Style chính */
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f7fc;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            width: 50%;
-            margin: 50px auto;
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            animation: fadeIn 0.6s ease-in-out;
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-        }
-
-        label {
-            font-size: 16px;
-            color: #333;
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        input[type="text"], 
-        input[type="number"], 
-        input[type="date"], 
-        select, 
-        input[type="file"] {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            font-size: 14px;
-            transition: border-color 0.3s ease;
-        }
-
-        input[type="text"]:focus, 
-        input[type="number"]:focus, 
-        input[type="date"]:focus, 
-        select:focus, 
-        input[type="file"]:focus {
-            border-color: #4CAF50;
-            outline: none;
-        }
-
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        .rolls-container {
-            margin-top: 20px;
-        }
-
-        .rolls-container input {
-            width: 80%;
-            display: inline-block;
-            margin-bottom: 8px;
-        }
-
-        .add-roll-btn {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            font-size: 14px;
-            border-radius: 5px;
-            cursor: pointer;
-            display: inline-block;
-            margin-bottom: 15px;
-        }
-
-        .image-preview {
-            margin-top: 10px;
-            text-align: center;
-        }
-
-        .image-preview img {
-            width: 200px;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 8px;
-            transition: transform 0.3s ease;
-        }
-
-        .image-preview img:hover {
-            transform: scale(1.1);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* Success message style */
-        .success-message {
-            display: none;
-            background-color: #4CAF50;
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            margin-bottom: 20px;
-            animation: slideDown 0.5s ease-out;
-        }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
+    <link rel="stylesheet" href="add_fabric_types.css">
 </head>
 <body>
 
@@ -214,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <h1>Thêm Sản Phẩm Mới</h1>
     
     <form method="POST" action="" enctype="multipart/form-data">
-        <label for="fabric_name">Tên Loại Vải:</label>
+        <label for="fabric_name">Tên Sản Phẩm:</label>
         <input type="text" id="fabric_name" name="fabric_name" required><br>
 
         <label for="fabric_color">Màu Sắc:</label>
@@ -223,8 +92,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <label for="fabric_price">Giá:</label>
         <input type="number" id="fabric_price" name="fabric_price" step="0.01" required><br>
 
-        <label for="price_effective_date">Ngày Có Hiệu Lực:</label>
-        <input type="date" id="price_effective_date" name="price_effective_date" required><br>
+        <label for="applied_date">Ngày Áp Dụng:</label>
+        <input type="date" id="applied_date" name="applied_date" required><br>
 
         <label for="fabric_quantity">Số Lượng:</label>
         <input type="number" id="fabric_quantity" name="fabric_quantity" required><br>
@@ -232,9 +101,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <label for="supplier_id">Nhà Cung Cấp:</label>
         <select id="supplier_id" name="supplier_id" required>
             <?php
-            $stmt = $conn->query("SELECT supplier_id, name FROM suppliers");
+            $stmt = $conn->query("SELECT SCode, Name FROM supplier");
             while ($supplier = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                echo "<option value='" . $supplier['supplier_id'] . "'>" . $supplier['name'] . "</option>";
+                echo "<option value='" . $supplier['SCode'] . "'>" . $supplier['Name'] . "</option>";
             }
             ?>
         </select><br>
@@ -247,9 +116,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
 
         <div class="rolls-container">
-            <label for="roll_lengths">Chiều Dài Cuộn Vải:</label>
+            <label for="roll_lengths">Chiều Dài Cuộn Vải (m):</label>
             <input type="number" step="0.01" name="roll_lengths[]" required>
-            <button type="button" class="add-roll-btn" onclick="addRollInput()">Thêm cuộn vải khác</button>
+            <button type="button" class="add-roll-btn" onclick="addRollInput()">Thêm cuộn vải</button>
         </div>
 
         <button type="submit">Thêm Sản Phẩm</button>
@@ -257,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </div>
 
 <script>
-    // Chức năng xem trước hình ảnh khi chọn tệp
+    // Xem trước hình ảnh khi tải lên
     function previewImage(event) {
         const file = event.target.files[0];
         const reader = new FileReader();

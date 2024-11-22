@@ -1,6 +1,6 @@
 <?php
 $host = 'localhost'; // Thay đổi nếu cần
-$db = 'fabricagency';
+$db = 'fabric_new';
 $user = 'root'; // Thay đổi nếu cần
 $password = '';
 

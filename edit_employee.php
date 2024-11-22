@@ -4,19 +4,19 @@ include('connect.php');
 include "nav.php";  // Thêm phần điều hướng (nếu có)
 
 // Lấy ID nhân viên từ URL
-if (isset($_GET['employee_id'])) {
-    $employee_id = $_GET['employee_id'];
+if (isset($_GET['ECode'])) {
+    $ECode = $_GET['ECode'];
 
     // Lấy thông tin nhân viên từ cơ sở dữ liệu
-    $sql = "SELECT * FROM employees WHERE employee_id = :employee_id";
+    $sql = "SELECT * FROM employee WHERE ECode = :ECode";
     $stmt = $conn->prepare($sql);
-    $stmt->bindParam(':employee_id', $employee_id, PDO::PARAM_INT);
+    $stmt->bindParam(':ECode', $ECode, PDO::PARAM_INT);
     $stmt->execute();
     
     if ($stmt->rowCount() > 0) {
         $employee = $stmt->fetch(PDO::FETCH_ASSOC);
     } else {
-        echo "Không tìm thấy nhân viên với ID này.";
+        echo "<p style='color: red;'>Không tìm thấy nhân viên với mã này.</p>";
         exit();
     }
 }
@@ -24,23 +24,23 @@ if (isset($_GET['employee_id'])) {
 // Xử lý cập nhật thông tin nhân viên
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Lấy dữ liệu từ form
-    $first_name = $_POST['first_name'];
-    $last_name = $_POST['last_name'];
-    $gender = $_POST['gender'];
-    $address = $_POST['address'];
-    $phone = $_POST['phone'];
-    $role = $_POST['role'];
+    $Fname = $_POST['Fname'];
+    $Lname = $_POST['Lname'];
+    $Gender = $_POST['Gender'];
+    $Address = $_POST['Address'];
+    $Phone = $_POST['Phone'];
+    $Role = $_POST['Role'];
 
     // Cập nhật thông tin nhân viên vào cơ sở dữ liệu
-    $update_sql = "UPDATE employees SET first_name = :first_name, last_name = :last_name, gender = :gender, address = :address, phone = :phone, role = :role WHERE employee_id = :employee_id";
+    $update_sql = "UPDATE employee SET Fname = :Fname, Lname = :Lname, Gender = :Gender, Address = :Address, Phone = :Phone, Role = :Role WHERE ECode = :ECode";
     $stmt = $conn->prepare($update_sql);
-    $stmt->bindParam(':first_name', $first_name, PDO::PARAM_STR);
-    $stmt->bindParam(':last_name', $last_name, PDO::PARAM_STR);
-    $stmt->bindParam(':gender', $gender, PDO::PARAM_STR);
-    $stmt->bindParam(':address', $address, PDO::PARAM_STR);
-    $stmt->bindParam(':phone', $phone, PDO::PARAM_STR);
-    $stmt->bindParam(':role', $role, PDO::PARAM_STR);
-    $stmt->bindParam(':employee_id', $employee_id, PDO::PARAM_INT);
+    $stmt->bindParam(':Fname', $Fname, PDO::PARAM_STR);
+    $stmt->bindParam(':Lname', $Lname, PDO::PARAM_STR);
+    $stmt->bindParam(':Gender', $Gender, PDO::PARAM_STR);
+    $stmt->bindParam(':Address', $Address, PDO::PARAM_STR);
+    $stmt->bindParam(':Phone', $Phone, PDO::PARAM_STR);
+    $stmt->bindParam(':Role', $Role, PDO::PARAM_STR);
+    $stmt->bindParam(':ECode', $ECode, PDO::PARAM_INT);
 
     // Kiểm tra xem có cập nhật thành công không
     if ($stmt->execute()) {
@@ -64,35 +64,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <!-- Form chỉnh sửa thông tin nhân viên -->
     <form method="post">
         <!-- Tên -->
-        <label for="first_name">Tên:</label><br>
-        <input type="text" id="first_name" name="first_name" value="<?php echo htmlspecialchars($employee['first_name']); ?>" required><br><br>
+        <label for="Fname">Tên:</label><br>
+        <input type="text" id="Fname" name="Fname" value="<?php echo htmlspecialchars($employee['Fname']); ?>" required><br><br>
 
         <!-- Họ -->
-        <label for="last_name">Họ:</label><br>
-        <input type="text" id="last_name" name="last_name" value="<?php echo htmlspecialchars($employee['last_name']); ?>" required><br><br>
+        <label for="Lname">Họ:</label><br>
+        <input type="text" id="Lname" name="Lname" value="<?php echo htmlspecialchars($employee['Lname']); ?>" required><br><br>
 
         <!-- Giới tính -->
-        <label for="gender">Giới tính:</label><br>
-        <select id="gender" name="gender" required>
-            <option value="Nam" <?php if ($employee['gender'] == 'Nam') echo 'selected'; ?>>Nam</option>
-            <option value="Nữ" <?php if ($employee['gender'] == 'Nữ') echo 'selected'; ?>>Nữ</option>
+        <label for="Gender">Giới tính:</label><br>
+        <select id="Gender" name="Gender" required>
+            <option value="Male" <?php if ($employee['Gender'] == 'Male') echo 'selected'; ?>>Nam</option>
+            <option value="Female" <?php if ($employee['Gender'] == 'Female') echo 'selected'; ?>>Nữ</option>
         </select><br><br>
 
         <!-- Địa chỉ -->
-        <label for="address">Địa chỉ:</label><br>
-        <input type="text" id="address" name="address" value="<?php echo htmlspecialchars($employee['address']); ?>"><br><br>
+        <label for="Address">Địa chỉ:</label><br>
+        <input type="text" id="Address" name="Address" value="<?php echo htmlspecialchars($employee['Address']); ?>"><br><br>
 
         <!-- Số điện thoại -->
-        <label for="phone">Số điện thoại:</label><br>
-        <input type="text" id="phone" name="phone" value="<?php echo htmlspecialchars($employee['phone']); ?>"><br><br>
+        <label for="Phone">Số điện thoại:</label><br>
+        <input type="text" id="Phone" name="Phone" value="<?php echo htmlspecialchars($employee['Phone']); ?>"><br><br>
 
         <!-- Vai trò -->
-        <label for="role">Vai trò:</label><br>
-        <select id="role" name="role" required>
-            <option value="Manager" <?php if ($employee['role'] == 'Manager') echo 'selected'; ?>>Quản lý</option>
-            <option value="Partner" <?php if ($employee['role'] == 'Partner') echo 'selected'; ?>>Đối tác</option>
-            <option value="Operations" <?php if ($employee['role'] == 'Operations') echo 'selected'; ?>>Hoạt động</option>
-            <option value="Office" <?php if ($employee['role'] == 'Office') echo 'selected'; ?>>Văn phòng</option>
+        <label for="Role">Vai trò:</label><br>
+        <select id="Role" name="Role" required>
+            <option value="Manager" <?php if ($employee['Role'] == 'Manager') echo 'selected'; ?>>Quản lý</option>
+            <option value="PartnerStaff" <?php if ($employee['Role'] == 'PartnerStaff') echo 'selected'; ?>>Nhân viên đối tác</option>
+            <option value="OperationalStaff" <?php if ($employee['Role'] == 'OperationalStaff') echo 'selected'; ?>>Nhân viên vận hành</option>
+            <option value="OfficeStaff" <?php if ($employee['Role'] == 'OfficeStaff') echo 'selected'; ?>>Nhân viên văn phòng</option>
         </select><br><br>
 
         <!-- Nút cập nhật -->

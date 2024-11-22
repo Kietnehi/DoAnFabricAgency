@@ -2,24 +2,32 @@
 require 'connect.php';
 
 function updateCustomerBalance($conn, $customer_id, $payment_amount) {
-    // Cập nhật công nợ của khách hàng
-    $stmt = $conn->prepare("UPDATE customers SET outstanding_balance = outstanding_balance - ? WHERE customer_id = ?");
+    // Update the outstanding balance of the customer
+    $stmt = $conn->prepare("UPDATE customer SET Dept = Dept - ? WHERE CusId = ?");
     $stmt->execute([$payment_amount, $customer_id]);
 
-    // Kiểm tra công nợ để cập nhật trạng thái cảnh báo
-    $stmt = $conn->prepare("SELECT outstanding_balance, warning_status, warning_start_date FROM customers WHERE customer_id = ?");
+    // Fetch the updated balance and alert status
+    $stmt = $conn->prepare("
+        SELECT Dept AS outstanding_balance, 
+               cs.Alert AS warning_status, 
+               cs.AlertStartDate AS warning_start_date
+        FROM customer c
+        LEFT JOIN customerstatus cs ON c.CusId = cs.CusId
+        WHERE c.CusId = ?
+    ");
     $stmt->execute([$customer_id]);
     $customer = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($customer['outstanding_balance'] > 2000 && $customer['warning_status'] == 0) {
-        // Đặt cảnh báo nếu công nợ vượt quá 2000 USD
-        $stmt = $conn->prepare("UPDATE customers SET warning_status = 1, warning_start_date = CURDATE() WHERE customer_id = ?");
+        // Set warning if the outstanding balance exceeds 2000 USD
+        $stmt = $conn->prepare("UPDATE customerstatus SET Alert = 1, AlertStartDate = CURDATE() WHERE CusId = ?");
         $stmt->execute([$customer_id]);
     }
 
-    if ($customer['warning_status'] == 1 && $customer['warning_start_date'] && (strtotime($customer['warning_start_date']) <= strtotime('-6 months'))) {
-        // Đánh dấu "nợ xấu" nếu cảnh báo kéo dài quá 6 tháng
-        $stmt = $conn->prepare("UPDATE customers SET bad_debt_status = 1 WHERE customer_id = ?");
+    if ($customer['warning_status'] == 1 && $customer['warning_start_date'] && 
+        (strtotime($customer['warning_start_date']) <= strtotime('-6 months'))) {
+        // Mark as "bad debt" if the warning has been active for more than 6 months
+        $stmt = $conn->prepare("UPDATE customerstatus SET BadDebt = 1 WHERE CusId = ?");
         $stmt->execute([$customer_id]);
     }
 }

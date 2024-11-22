@@ -1,26 +1,34 @@
 <?php
 session_start();
-require 'connect.php'; // Kết nối tới cơ sở dữ liệu
+require 'connect.php'; // Connect to the database
+
+$error = ""; // Default error message
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    // Kiểm tra xem username có tồn tại không
+    // Query to fetch user by username
     $stmt = $conn->prepare("SELECT * FROM users WHERE username = :username");
     $stmt->execute(['username' => $username]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Kiểm tra mật khẩu
-    if ($user && password_verify($password, $user['password'])) {
+    // Debugging: Check if user exists
+    if (!$user) {
+        $error = "Tên đăng nhập không tồn tại.";
+        error_log("No user found for username: $username");
+    } elseif (password_verify($password, $user['password_hash'])) {
+        // Password matches
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
 
-        // Chuyển hướng đến trang chính
+        // Redirect to main page
         header("Location: index.php");
         exit();
     } else {
+        // Invalid password
         $error = "Tên đăng nhập hoặc mật khẩu không đúng!";
+        error_log("Password verification failed for user: $username");
     }
 }
 ?>
@@ -56,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </form>
 
         <?php if (!empty($error)): ?>
-            <p style="color: red; text-align: center;"><?php echo $error; ?></p>
+            <p style="color: red; text-align: center;"><?php echo htmlspecialchars($error); ?></p>
         <?php endif; ?>
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>

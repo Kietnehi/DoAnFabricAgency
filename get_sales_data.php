@@ -10,26 +10,33 @@ require 'connect.php'; // Kết nối đến cơ sở dữ liệu
 try {
     // Lấy doanh thu theo tháng
     $monthly_revenue = $conn->query("
-        SELECT DATE_FORMAT(order_date, '%Y-%m') AS month, SUM(total_amount) AS revenue 
-        FROM Orders 
+        SELECT DATE_FORMAT(OrderTime, '%Y-%m') AS month, 
+               SUM(TotalPrice) AS revenue 
+        FROM orders 
+        WHERE Status = 'Completed'
         GROUP BY month
+        ORDER BY month ASC
     ")->fetchAll(PDO::FETCH_ASSOC);
 
     // Lấy doanh thu theo loại vải
     $fabric_revenue = $conn->query("
-        SELECT Fabric_Types.name AS fabric_name, SUM(Fabric_Rolls.length * Fabric_Types.current_price) AS revenue 
-        FROM Order_Fabric_Rolls 
-        JOIN Fabric_Rolls ON Order_Fabric_Rolls.roll_id = Fabric_Rolls.roll_id
-        JOIN Fabric_Types ON Fabric_Rolls.fabric_type_id = Fabric_Types.fabric_type_id 
+        SELECT category.Name AS fabric_name, 
+               SUM(bolt.Length * category.Price) AS revenue 
+        FROM bolt 
+        JOIN category ON bolt.CCode = category.CCode
         GROUP BY fabric_name
+        ORDER BY revenue DESC
     ")->fetchAll(PDO::FETCH_ASSOC);
 
     // Lấy doanh thu theo khách hàng
     $customer_revenue = $conn->query("
-        SELECT CONCAT(Customers.first_name, ' ', Customers.last_name) AS customer_name, SUM(total_amount) AS revenue 
-        FROM Orders 
-        JOIN Customers ON Orders.customer_id = Customers.customer_id 
+        SELECT CONCAT(customer.Fname, ' ', customer.Lname) AS customer_name, 
+               SUM(orders.TotalPrice) AS revenue 
+        FROM orders 
+        JOIN customer ON orders.CusId = customer.CusId
+        WHERE orders.Status = 'Completed'
         GROUP BY customer_name
+        ORDER BY revenue DESC
     ")->fetchAll(PDO::FETCH_ASSOC);
 
     // Đặt tiêu đề cho JSON và trả về dữ liệu
@@ -37,7 +44,8 @@ try {
     echo json_encode([
         'monthly_revenue' => $monthly_revenue,
         'fabric_revenue' => $fabric_revenue,
-        'customer_revenue' => $customer_revenue
+        'customer_revenue' => $customer_revenue,
+        'has_data' => !empty($monthly_revenue) || !empty($fabric_revenue) || !empty($customer_revenue)
     ]);
 
 } catch (PDOException $e) {
