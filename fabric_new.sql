@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 22, 2024 lúc 11:39 AM
+-- Thời gian đã tạo: Th10 23, 2024 lúc 09:39 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -40,7 +40,10 @@ CREATE TABLE `bolt` (
 INSERT INTO `bolt` (`BCode`, `Length`, `CCode`) VALUES
 (1, 50, 1),
 (2, 75, 2),
-(4, 40, 4);
+(3, 35, 3),
+(4, 40, 4),
+(5, 25, 5),
+(6, 15, 6);
 
 -- --------------------------------------------------------
 
@@ -64,12 +67,12 @@ CREATE TABLE `category` (
 --
 
 INSERT INTO `category` (`CCode`, `Name`, `Color`, `RemainQuantity`, `Price`, `AppliedDate`, `SCode`, `img`) VALUES
-(1, 'Silk', 'Red', 100, 25.00, '2023-01-13', 4, 'img9.jpg'),
-(2, 'Kaki', 'Green', 195, 30.00, '2023-02-01', 1, 'img2.jpg'),
+(1, 'Silk', 'Red', 98, 25.00, '2023-01-13', 4, 'img9.jpg'),
+(2, 'Kaki', 'Green', 193, 30.00, '2023-02-01', 1, 'img2.jpg'),
 (3, 'Embroidered', 'Blue', 141, 35.00, '2023-03-01', 2, 'img3.jpg'),
-(4, 'Jacquard', 'Yellow', 97, 18.00, '2023-04-01', 2, 'img4.jpg'),
+(4, 'Jacquard', 'Yellow', 92, 18.00, '2023-04-01', 2, 'img4.jpg'),
 (5, 'Polyester', 'Black', 289, 40.00, '2023-05-01', 3, 'img5.jpg'),
-(6, 'Linen', 'White', 245, 12.00, '2023-06-01', 3, 'img6.jpg');
+(6, 'Linen', 'White', 242, 12.00, '2023-06-01', 3, 'img6.jpg');
 
 -- --------------------------------------------------------
 
@@ -92,9 +95,12 @@ CREATE TABLE `customer` (
 --
 
 INSERT INTO `customer` (`CusId`, `Fname`, `Lname`, `Phone`, `Address`, `Dept`, `ECode`) VALUES
-(1, 'Tom', 'Hanks', '333444555', '123 River St', 1.00, 4),
-(2, 'Emma', 'Stone', '777888999', '456 Mountain Rd', 0.00, 4),
-(3, 'Chris', 'Evans', '111222333', '789 Hill Ln', 20.00, 4);
+(1, 'Tom', 'Hanks', '333444555', '123 River St', 1.00, 5),
+(2, 'Emma', 'Stone', '777888999', '456 Mountain Rd', 0.00, 5),
+(3, 'Chris', 'Evans', '111222333', '789 Hill Ln', 20.00, 5),
+(11, 'Fat', 'Le', '12383838', '123 trung son', 0.00, 2),
+(12, 'Kiet', 'Truong', '12937736', '123j ksjdf', 0.00, 2),
+(13, 'Quyen', 'Le', '12739123', 'klj3213', 3000.00, 2);
 
 -- --------------------------------------------------------
 
@@ -116,7 +122,10 @@ CREATE TABLE `customerstatus` (
 INSERT INTO `customerstatus` (`CusId`, `Alert`, `BadDebt`, `AlertStartDate`) VALUES
 (1, 0, 0, NULL),
 (2, 0, 0, '2024-01-01'),
-(3, 0, 1, '2024-01-01');
+(3, 0, 0, '2024-01-01'),
+(11, 0, 0, NULL),
+(12, 0, 0, NULL),
+(13, 1, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -156,7 +165,9 @@ INSERT INTO `customer_partialpayments` (`CusId`, `Amount`, `PaymentTime`, `OCode
 (1, 41.00, '2024-11-22 03:49:57', NULL, 17),
 (1, 12.00, '2024-11-22 09:56:26', 10, 18),
 (1, 12.00, '2024-11-22 09:57:55', 10, 19),
-(1, 12.00, '2024-11-22 09:57:58', 10, 20);
+(1, 12.00, '2024-11-22 09:57:58', 10, 20),
+(11, 20.00, '2024-11-23 05:08:01', 11, 21),
+(12, 85.00, '2024-11-23 06:42:36', 13, 22);
 
 -- --------------------------------------------------------
 
@@ -180,9 +191,12 @@ CREATE TABLE `employee` (
 
 INSERT INTO `employee` (`ECode`, `Fname`, `Lname`, `Gender`, `Address`, `Phone`, `Role`) VALUES
 (1, 'John', 'Doe', 'Male', '123 Main St', '123456789', 'Manager'),
-(2, 'Jane', 'Smith', 'Female', '456 Elm St', '987654321', 'OperationalStaff'),
+(2, 'Jane', 'Smith', 'Female', '456 Elm St', '987654321', 'OfficeStaff'),
 (3, 'Alice', 'Brown', 'Female', '789 Oak St', '543216789', 'PartnerStaff'),
-(4, 'Bob', 'Johnson', 'Male', '321 Pine Rd', '678954321', 'PartnerStaff');
+(4, 'Bob', 'Johnson', 'Male', '321 Pine Rd', '678954321', 'PartnerStaff'),
+(5, 'Pam', 'Beesly', 'Female', '1830 Maple Rd', '9876543210', 'OfficeStaff'),
+(6, 'Angela', 'Martin', 'Female', '789 Paws Ave', '1118882222', 'OperationalStaff'),
+(7, 'Bold', 'David', 'Female', '1234 Kays St', '1236231233', 'OperationalStaff');
 
 -- --------------------------------------------------------
 
@@ -206,12 +220,15 @@ CREATE TABLE `orders` (
 --
 
 INSERT INTO `orders` (`OCode`, `TotalPrice`, `OrderTime`, `Status`, `HandleTime`, `ECode`, `CusId`, `Cancellation_Reason`) VALUES
-(1, 250.00, '2024-03-01 03:30:00', 'paid', '2024-03-01 08:00:00', 2, 1, ''),
-(2, 500.00, '2024-03-02 04:00:00', 'partial_payment', '2024-11-07 09:15:07', 2, 2, NULL),
-(3, 300.00, '2024-03-03 05:00:00', 'partial_payment', '2024-03-03 07:30:00', 2, 3, NULL),
-(7, 54.00, '2024-11-21 20:22:00', 'partial_payment', '2024-11-04 09:15:12', 1, 1, '1'),
-(8, 90.00, '2024-11-21 20:46:15', 'partial_payment', '2024-11-28 09:15:15', 1, 1, NULL),
-(10, 90.00, '2024-11-22 03:47:41', 'cancelled', '2024-11-22 03:47:41', 1, 1, 'quá tệ ');
+(1, 250.00, '2024-03-01 03:30:00', 'paid', '2024-03-01 08:00:00', 6, 1, ''),
+(2, 500.00, '2024-03-02 04:00:00', 'partial_payment', '2024-11-07 09:15:07', 6, 1, NULL),
+(3, 300.00, '2024-03-03 05:00:00', 'partial_payment', '2024-03-03 07:30:00', 7, 3, NULL),
+(7, 54.00, '2024-11-21 20:22:00', 'partial_payment', '2024-11-04 09:15:12', 6, 1, '1'),
+(8, 90.00, '2024-11-21 20:46:15', 'partial_payment', '2024-11-28 09:15:15', 6, 1, NULL),
+(10, 90.00, '2024-11-22 03:47:41', 'cancelled', '2024-11-22 03:47:41', 6, 1, 'quá tệ '),
+(11, 90.00, '2024-11-22 23:04:00', 'partial_payment', '2024-11-22 23:04:38', 7, 11, ''),
+(12, 60.00, '2024-11-22 23:06:02', 'new', '2024-11-22 23:06:02', 6, 1, NULL),
+(13, 86.00, '2024-11-23 00:41:23', 'partial_payment', '2024-11-23 00:41:23', 7, 12, NULL);
 
 -- --------------------------------------------------------
 
@@ -235,7 +252,11 @@ CREATE TABLE `order_detail` (
 INSERT INTO `order_detail` (`DetailId`, `OCode`, `BCode`, `Quantity`, `UnitPrice`, `TotalPrice`) VALUES
 (4, 7, 4, 3, 18.00, 54.00),
 (5, 8, 4, 5, 18.00, 90.00),
-(7, 10, 4, 5, 18.00, 90.00);
+(7, 10, 4, 5, 18.00, 90.00),
+(8, 11, 4, 5, 18.00, 90.00),
+(9, 12, 2, 2, 30.00, 60.00),
+(10, 13, 1, 2, 25.00, 50.00),
+(11, 13, 6, 3, 12.00, 36.00);
 
 -- --------------------------------------------------------
 
@@ -260,9 +281,9 @@ CREATE TABLE `supplier` (
 INSERT INTO `supplier` (`SCode`, `Name`, `Address`, `BankAccount`, `TaxCode`, `Phone`, `ECode`) VALUES
 (1, 'ABC Supplies', '123 Supply Rd', '123-456-789', 'TAX001', '111222333', 3),
 (2, 'XYZ Materials', '456 Warehouse Ln', '987-654-321', 'TAX002', '444555666', 3),
-(3, 'Global Textiles', '789 Fabric Blvd', '456-789-123', 'TAX003', '777888999', 3),
-(4, 'Prime Fabrics', '987 Silk Ave', '789-123-456', 'TAX004', '555666777', 3),
-(5, '1', '1', '1', '1', '1', 1);
+(3, 'Global Textiles', '789 Fabric Blvd', '456-789-123', 'TAX003', '777888999', 4),
+(4, 'Prime Fabrics', '987 Silk Ave', '789-123-456', 'TAX004', '555666777', 4),
+(5, '1', '1', '1', '1', '1', 4);
 
 -- --------------------------------------------------------
 
@@ -407,31 +428,31 @@ ALTER TABLE `category`
 -- AUTO_INCREMENT cho bảng `customer`
 --
 ALTER TABLE `customer`
-  MODIFY `CusId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `CusId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT cho bảng `customer_partialpayments`
 --
 ALTER TABLE `customer_partialpayments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT cho bảng `employee`
 --
 ALTER TABLE `employee`
-  MODIFY `ECode` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `ECode` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT cho bảng `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `OCode` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `OCode` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT cho bảng `order_detail`
 --
 ALTER TABLE `order_detail`
-  MODIFY `DetailId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `DetailId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT cho bảng `supplier`
@@ -509,3 +530,4 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
