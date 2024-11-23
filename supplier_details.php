@@ -69,9 +69,12 @@ $partner_staff = $staff_stmt->fetchAll(PDO::FETCH_ASSOC);
     <p><strong>Mã số thuế:</strong> <?= htmlspecialchars($supplier['TaxCode']); ?></p>
     <p><strong>Tài khoản ngân hàng:</strong> <?= htmlspecialchars($supplier['BankAccount']); ?></p>
 
-    <?php if (isset($partner_staff[0])): ?>
+    <?php if (!empty($partner_staff[0])): ?>
     <p><strong>Nhân viên đối tác:</strong> NV <?= htmlspecialchars($partner_staff[0]['ECode']); ?> - <?= htmlspecialchars($partner_staff[0]['Fname'] . " " . $partner_staff[0]['Lname']); ?></p>
-    <?php endif; ?>
+<?php else: ?>
+    <p><strong>Nhân viên đối tác:</strong> Chưa được chỉ định.</p>
+<?php endif; ?>
+
 
 
 
