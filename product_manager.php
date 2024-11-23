@@ -230,12 +230,12 @@ include 'nav.php';
         <thead>
             <tr>
                 <th>Mã sản phẩm</th>
+                <th>Nhà cung cấp</th>
                 <th>Tên sản phẩm</th>
                 <th>Màu sắc</th>
                 <th>Giá</th>
                 <th>Ngày áp dụng</th>
                 <th>Số lượng</th>
-                <th>Nhà cung cấp</th>
                 <th>Địa chỉ</th>
                 <th>Số điện thoại</th>
                 <th>Tài khoản ngân hàng</th>
@@ -249,12 +249,12 @@ include 'nav.php';
                 <?php foreach ($products as $product): ?>
                     <tr>
                         <td><?= htmlspecialchars($product['CCode']); ?></td>
+                        <td><?= htmlspecialchars($product['SupplierName']); ?></td>
                         <td><?= htmlspecialchars($product['ProductName']); ?></td>
                         <td><?= htmlspecialchars($product['Color']); ?></td>
                         <td><?= number_format($product['Price'], 2); ?> USD</td>
                         <td><?= htmlspecialchars($product['AppliedDate']); ?></td>
                         <td><?= htmlspecialchars($product['RemainQuantity']); ?></td>
-                        <td><?= htmlspecialchars($product['SupplierName']); ?></td>
                         <td><?= htmlspecialchars($product['Address']); ?></td>
                         <td><?= htmlspecialchars($product['Phone']); ?></td>
                         <td><?= htmlspecialchars($product['BankAccount']); ?></td>

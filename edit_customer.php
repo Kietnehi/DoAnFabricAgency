@@ -172,7 +172,7 @@ ob_end_flush();
             <select name="ecode" required>
                 <?php
                 // Lấy danh sách nhân viên
-                $stmt = $conn->prepare("SELECT ECode, CONCAT(Fname, ' ', Lname) AS FullName FROM employee");
+                $stmt = $conn->prepare("SELECT ECode, CONCAT(Fname, ' ', Lname) AS FullName FROM employee WHERE Role='OfficeStaff'");
                 $stmt->execute();
                 $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 foreach ($employees as $employee):

@@ -12,7 +12,7 @@ include 'nav.php'; // Bao gồm thanh điều hướng
 // Truy vấn danh sách nhân viên từ bảng `employee`
 $employees = [];
 try {
-    $stmt = $conn->prepare("SELECT ECode, CONCAT(Fname, ' ', Lname) AS FullName FROM employee");
+    $stmt = $conn->prepare("SELECT ECode, CONCAT(Fname, ' ', Lname) AS FullName FROM employee WHERE Role = 'OfficeStaff'");
     $stmt->execute();
     $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {

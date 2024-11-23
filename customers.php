@@ -23,7 +23,7 @@ $sql = "SELECT c.CusId, c.Fname, c.Lname, c.Phone, c.Address, c.Dept, c.ECode,
         CONCAT('NV ', e.ECode, ' - ', e.Fname, ' ', e.Lname) AS EmployeeInfo
         FROM customer c
         LEFT JOIN employee e ON c.ECode = e.ECode
-        WHERE c.Fname LIKE :query OR c.Lname LIKE :query OR c.Phone LIKE :query
+        WHERE c.Fname LIKE :query OR c.Lname LIKE :query OR c.Phone LIKE :query AND e.Role = 'OfficeStaff'
         ORDER BY $order_by $order_dir
         LIMIT :limit OFFSET :offset";
 $stmt = $conn->prepare($sql);
