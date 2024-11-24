@@ -43,6 +43,7 @@ $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -51,6 +52,7 @@ $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="supplier.css">
 </head>
+
 <body>
     <div class="container">
         <h1>Quản lý Nhà cung cấp</h1>
@@ -82,8 +84,8 @@ $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <td><?php echo htmlspecialchars($row['TaxCode']); ?></td>
                         <td><?php echo htmlspecialchars($row['Phone']); ?></td>
                         <td>
-                            <a href="edit_supplier.php?id=<?php echo $row['SCode']; ?>" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i>sửa</a>
-                            <a href="delete_supplier.php?id=<?php echo $row['SCode']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn xóa nhà cung cấp này?');"><i class="fas fa-trash"></i> Xóa</a>
+                            <a href="edit_supplier.php?id=<?php echo $row['SCode']; ?>" class="btn btn-sm edit"><i class="fas fa-edit"></i>sửa</a>
+                            <a href="delete_supplier.php?id=<?php echo $row['SCode']; ?>" class="btn btn-sm delete" onclick="return confirm('Bạn có chắc chắn muốn xóa nhà cung cấp này?');"><i class="fas fa-trash"></i> Xóa</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -104,6 +106,7 @@ $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
 </body>
+
 </html>
 
 <?php

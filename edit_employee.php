@@ -57,6 +57,72 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chỉnh sửa thông tin nhân viên</title>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+    }
+
+    h2 {
+        text-align: center;
+        color: #333;
+    }
+
+    form {
+        background: #fff;
+        padding: 20px;
+        margin: 0 auto;
+        width: 50%;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    label {
+        font-weight: bold;
+        color: #555;
+    }
+
+    input[type="text"], select {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0 20px 0;
+        display: inline-block;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+
+    a {
+        text-decoration: none;
+        color: #4CAF50;
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    a:hover {
+        color: #45a049;
+    }
+
+    p {
+        text-align: center;
+    }
+</style>
+
 </head>
 <body>
     <h2>Chỉnh sửa thông tin nhân viên</h2>
