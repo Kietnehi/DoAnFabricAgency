@@ -47,73 +47,62 @@ h1 {
     transform: scale(1.05); /* Nút lớn hơn một chút khi hover */
 }
 
+/* Style cho bảng */
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 20px;
+    margin-top: 20px;
 }
-th, td {
-    padding: 12px 15px;
-    text-align: left;
+table th {
+    background: #333 !important;
+    color: #f4f4f9 !important;
+    font-weight: bold !important;
 }
-th {
-    background-color: #333;
-    color: white;
-    cursor: pointer;
-    position: relative;
-}
-th a.sortable {
-    color: white;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-}
-th a.sortable:hover {
-    text-decoration: underline;
-}
-tr:nth-child(even) {
-    background-color: #f2f2f2;
-}
-.action-buttons a {
-    padding: 6px 12px;
-    margin: 2px;
-    border-radius: 5px;
-    text-decoration: none;
-    color: white;
-    transition: 0.2s;
-}
-.edit-btn {
-    background-color: #4CAF50;
-}
-.edit-btn:hover {
-    background-color: #45a049;
-}
-.delete-btn {
-    background-color: #f44336;
-}
-.delete-btn:hover {
-    background-color: #d32f2f;
-}
-.pagination {
-    display: flex;
-    justify-content: center;
-    margin-top: 0;
-}
-.pagination a {
-    color: #333;
-    padding: 8px 12px;
-    margin: 0 4px;
-    border-radius: 5px;
+table th, table td {
+    padding: 10px;
     border: 1px solid #ddd;
-    text-decoration: none;
-    transition: 0.3s;
+    text-align: center;
 }
-.pagination a:hover {
-    background-color: #333;
-    color: #fff;
+
+/* Định kiểu cho các hàng chẵn và lẻ */
+.table tbody tr:nth-child(odd) {
+    background-color: #f2f2f2; /* Màu nền cho hàng lẻ */
 }
-.pagination a.active {
-    background-color: #007bff;
+
+.table tbody tr:nth-child(even) {
+    background-color: #ffffff; /* Màu nền cho hàng chẵn */
+}
+
+/* Style cho nút xóa */
+.delete {
+    background: #f44336; /* Màu đỏ */
     color: white;
-    border: 1px solid #007bff;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.2s;
+    margin-top: 10px;
+}
+
+.delete:hover {
+    background: #d32f2f; /* Màu đỏ đậm hơn khi hover */
+    transform: scale(1.05); /* Nút lớn hơn một chút khi hover */
+    margin-top: 10px;
+}
+
+/* Style cho nút sửa */
+.edit {
+    background: #4CAF50; /* Màu xanh lá cây */
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.edit:hover {
+    background: #45a049; /* Màu xanh lá cây đậm hơn khi hover */
+    transform: scale(1.05); /* Nút lớn hơn một chút khi hover */
 }
