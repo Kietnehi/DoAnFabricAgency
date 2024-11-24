@@ -60,7 +60,7 @@ $order_details = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <p><strong>Khách Hàng:</strong> <?= htmlspecialchars($order['cust_first'] . " " . $order['cust_last']) ?></p>
     <p><strong>Nhân Viên:</strong> <?= htmlspecialchars($order['emp_first'] . " " . $order['emp_last']) ?></p>
     <p><strong>Ngày Đặt Hàng:</strong> <?= htmlspecialchars($order['OrderTime']) ?></p>
-    <p><strong>Tổng Tiền:</strong> <?= number_format($order['TotalPrice'], 2) ?> VND</p>
+    <p><strong>Tổng Tiền:</strong> <?= number_format($order['TotalPrice'], 2) ?> USD</p>
     <p><strong>Trạng Thái:</strong> <?= htmlspecialchars($order['Status']) ?></p>
 
     <h2>Chi Tiết Sản Phẩm</h2>
@@ -70,8 +70,8 @@ $order_details = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <th>Tên Loại Vải</th>
                 <th>Chiều Dài (m)</th>
                 <th>Số Lượng</th>
-                <th>Đơn Giá (VND)</th>
-                <th>Thành Tiền (VND)</th>
+                <th>Đơn Giá (USD)</th>
+                <th>Thành Tiền (USD)</th>
             </tr>
         </thead>
         <tbody>

@@ -23,6 +23,16 @@ $products_stmt = $conn->prepare("
 ");
 $products_stmt->execute([$SCode]);
 $products = $products_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Lấy danh sách nhân viên đối tác ("PartnerStaff") liên quan đến nhà cung cấp
+$staff_stmt = $conn->prepare("
+    SELECT e.ECode, e.Fname, e.Lname
+    FROM employee e
+    JOIN supplier s ON e.ECode = s.ECode
+    WHERE e.Role = 'PartnerStaff' AND s.SCode = ?
+");
+$staff_stmt->execute([$SCode]);
+$partner_staff = $staff_stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -45,6 +55,11 @@ $products = $products_stmt->fetchAll(PDO::FETCH_ASSOC);
         img {
             border-radius: 5px;
         }
+        .no-data {
+            text-align: center;
+            font-style: italic;
+            color: gray;
+        }
     </style>
 </head>
 <body>
@@ -53,6 +68,16 @@ $products = $products_stmt->fetchAll(PDO::FETCH_ASSOC);
     <p><strong>Số điện thoại:</strong> <?= htmlspecialchars($supplier['Phone']); ?></p>
     <p><strong>Mã số thuế:</strong> <?= htmlspecialchars($supplier['TaxCode']); ?></p>
     <p><strong>Tài khoản ngân hàng:</strong> <?= htmlspecialchars($supplier['BankAccount']); ?></p>
+
+    <?php if (!empty($partner_staff[0])): ?>
+    <p><strong>Nhân viên đối tác:</strong> NV <?= htmlspecialchars($partner_staff[0]['ECode']); ?> - <?= htmlspecialchars($partner_staff[0]['Fname'] . " " . $partner_staff[0]['Lname']); ?></p>
+<?php else: ?>
+    <p><strong>Nhân viên đối tác:</strong> Chưa được chỉ định.</p>
+<?php endif; ?>
+
+
+
+
 
     <h3>Các sản phẩm được cung cấp</h3>
     <?php if (count($products) > 0): ?>
@@ -81,7 +106,7 @@ $products = $products_stmt->fetchAll(PDO::FETCH_ASSOC);
                         <?php if ($product['img']): ?>
                             <img src="img/<?= htmlspecialchars($product['img']); ?>" alt="Hình ảnh sản phẩm" width="50">
                         <?php else: ?>
-                            <p>Chưa có hình ảnh</p>
+                            <p class="no-data">Chưa có hình ảnh</p>
                         <?php endif; ?>
                     </td>
                 </tr>
@@ -89,7 +114,7 @@ $products = $products_stmt->fetchAll(PDO::FETCH_ASSOC);
             </tbody>
         </table>
     <?php else: ?>
-        <p>Nhà cung cấp này chưa cung cấp sản phẩm nào.</p>
+        <p class="no-data">Nhà cung cấp này chưa cung cấp sản phẩm nào.</p>
     <?php endif; ?>
 
     <a href="product_manager.php" class="btn btn-primary">Quay lại</a>

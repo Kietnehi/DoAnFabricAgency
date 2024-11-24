@@ -12,7 +12,7 @@ include 'nav.php'; // Bao gồm thanh điều hướng
 // Truy vấn danh sách nhân viên từ bảng `employee`
 $employees = [];
 try {
-    $stmt = $conn->prepare("SELECT ECode, CONCAT(Fname, ' ', Lname) AS FullName FROM employee");
+    $stmt = $conn->prepare("SELECT ECode, CONCAT(Fname, ' ', Lname) AS FullName FROM employee WHERE Role = 'OfficeStaff'");
     $stmt->execute();
     $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
@@ -28,8 +28,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $phone = $_POST['phone']; // Số điện thoại
     $dept = $_POST['dept']; // Công nợ
     $ecode = $_POST['ecode']; // Mã nhân viên chăm sóc khách hàng (ECode)
-    $alert = isset($_POST['alert']) ? 1 : 0; // Trạng thái cảnh báo
-    $bad_debt = isset($_POST['bad_debt']) ? 1 : 0; // Nợ xấu
+    //$alert = isset($_POST['alert']) ? 1 : 0; // Trạng thái cảnh báo
+    //$bad_debt = isset($_POST['bad_debt']) ? 1 : 0; // Nợ xấu
 
     try {
         // Kiểm tra xem ECode có tồn tại không
@@ -47,8 +47,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $cus_id = $conn->lastInsertId();
 
         // Thêm hoặc cập nhật trạng thái cảnh báo và nợ xấu
-        $stmt = $conn->prepare("INSERT INTO customerstatus (CusId, Alert, BadDebt) VALUES (?, ?, ?)");
-        $stmt->execute([$cus_id, $alert, $bad_debt]);
+        //$stmt = $conn->prepare("INSERT INTO customerstatus (CusId, Alert, BadDebt) VALUES (?, ?, ?)");
+        //$stmt->execute([$cus_id, $alert, $bad_debt]);
 
         // Chuyển hướng về trang danh sách khách hàng
         header("Location: customers.php");
@@ -102,10 +102,10 @@ ob_end_flush();
                 <label for="phone">Số Điện Thoại:</label>
                 <input type="text" class="form-control" id="phone" name="phone" required>
             </div>
-            <div class="form-group">
+            <!-- <div class="form-group">
                 <label for="dept">Công Nợ (USD):</label>
                 <input type="number" class="form-control" id="dept" name="dept" step="0.01" required>
-            </div>
+            </div> -->
             <div class="form-group">
                 <label for="ecode">Nhân Viên Chăm Sóc:</label>
                 <select class="form-control" id="ecode" name="ecode" required>
@@ -117,7 +117,7 @@ ob_end_flush();
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="checkbox-group">
+            <!-- <div class="checkbox-group">
                 <input type="checkbox" id="alert" name="alert" value="1" disabled>
                 <label for="alert">Trạng Thái Cảnh Báo</label>
                 <small id="alert-warning" class="alert-warning"></small>
@@ -126,7 +126,7 @@ ob_end_flush();
                 <input type="checkbox" id="bad_debt" name="bad_debt" value="1" disabled>
                 <label for="bad_debt">Nợ Xấu</label>
                 <small id="bad-debt-warning" class="bad-debt-warning"></small>
-            </div>
+            </div> -->
             <button type="submit" class="btn btn-primary">Thêm Khách Hàng</button>
         </form>
     </div>

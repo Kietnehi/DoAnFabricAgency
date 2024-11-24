@@ -98,11 +98,11 @@ ob_end_flush();
                 <input type="text" class="form-control" id="phone" name="phone" required>
             </div>
             <div class="form-group">
-                <label for="ecode">Nhân Viên Quản Lý:</label>
+                <label for="ecode">Nhân Viên Đối Tác:</label>
                 <select class="form-control" id="ecode" name="ecode" required>
                     <?php
                     // Lấy danh sách nhân viên từ bảng `employee`
-                    $stmt = $conn->query("SELECT ECode, CONCAT(Fname, ' ', Lname) AS FullName FROM employee");
+                    $stmt = $conn->query("SELECT ECode, CONCAT(Fname, ' ', Lname) AS FullName FROM employee WHERE Role='PartnerStaff'");
                     $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     foreach ($employees as $employee) {
                         echo "<option value='{$employee['ECode']}'>{$employee['FullName']}</option>";

@@ -10,7 +10,7 @@ include 'nav.php'; // Bao gồm thanh điều hướng
 
 // Lấy danh sách khách hàng và nhân viên
 $customers = $conn->query("SELECT CusId, Fname, Lname FROM customer")->fetchAll(PDO::FETCH_ASSOC);
-$employees = $conn->query("SELECT ECode, Fname, Lname FROM employee")->fetchAll(PDO::FETCH_ASSOC);
+$employees = $conn->query("SELECT ECode, Fname, Lname FROM employee WHERE role = 'OperationalStaff'")->fetchAll(PDO::FETCH_ASSOC);
 
 // Lấy danh sách các cuộn vải và thông tin liên quan
 $fabric_rolls = $conn->query("
@@ -213,16 +213,16 @@ $fabric_rolls = $conn->query("
                     <div class="product-item" data-price="<?= $roll['current_price'] ?>" data-inventory="<?= $roll['total_inventory_quantity'] ?>">
                         <img src="img/<?= htmlspecialchars($roll['image']); ?>" alt="<?= htmlspecialchars($roll['fabric_name']); ?>">
                         <span class="product-name">
-                            <?= htmlspecialchars($roll['fabric_name']); ?> - Giá: <?= number_format($roll['current_price'], 2); ?> VND/m -
+                            <?= htmlspecialchars($roll['fabric_name']); ?> - Giá: <?= number_format($roll['current_price'], 2); ?> USD/m -
                             Dài: <?= number_format($roll['roll_length'], 2); ?> mét - 
-                            Tồn kho: <?= $roll['total_inventory_quantity']; ?> đơn vị
+                            Tồn kho: <?= $roll['total_inventory_quantity']; ?>
                         </span>
                         <input type="number" class="quantity" name="quantity[<?= $roll['BCode']; ?>]" value="0" min="0" onchange="calculateTotal()">
                     </div>
                 <?php endforeach; ?>
             </div>
 
-            <div class="total-display" id="total_display">Tổng Tiền (VND): 0.00</div>
+            <div class="total-display" id="total_display">Tổng Tiền (USD): 0.00</div>
             <input type="hidden" id="total_amount" name="total_amount" step="0.01" required readonly>
 
             <button type="submit">Tạo Đơn Hàng</button>

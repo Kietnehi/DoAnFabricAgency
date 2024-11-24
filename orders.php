@@ -92,7 +92,7 @@ $sql = "SELECT orders.*,
         FROM orders
         JOIN customer ON orders.CusId = customer.CusId
         JOIN employee ON orders.ECode = employee.ECode
-        WHERE customer.Fname LIKE :query OR customer.Lname LIKE :query
+        WHERE customer.Fname LIKE :query OR customer.Lname LIKE :query AND employee.Role = 'OperationalStaff'
         ORDER BY $order_by $order_dir
         LIMIT :limit OFFSET :offset";
 $stmt = $conn->prepare($sql);
