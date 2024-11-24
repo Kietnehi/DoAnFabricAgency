@@ -133,6 +133,7 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
         }
 
         .modal-content {
+            max-width: 500px;
             background-color: white;
             margin: 15% auto;
             padding: 20px;
@@ -150,9 +151,7 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
 
         .pay-btn {
             background: linear-gradient(to right, #f39c12, #f1c40f);
-            /* Gradient cam - vàng */
             color: white;
-            /* Chữ trắng nổi bật */
             border: none;
             padding: 10px 10px;
             text-align: center;
@@ -163,26 +162,22 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
             cursor: pointer;
             border-radius: 4px;
             transition: background 0.3s ease, transform 0.2s;
-            /* Hiệu ứng chuyển động */
         }
 
         .pay-btn:hover {
             background: linear-gradient(to right, #d68910, #d4ac0d);
-            /* Gradient đậm hơn khi hover */
             transform: scale(1.05);
-            /* Hiệu ứng nhấn nhẹ khi hover */
         }
     </style>
     <script>
         function openPaymentModal(orderId, remainingBalance) {
-            const amount = prompt(`Nhập số tiền thanh toán (tối đa $${remainingBalance.toFixed(2)}):`);
-            if (amount && parseFloat(amount) > 0 && parseFloat(amount) <= remainingBalance) {
-                document.getElementById('pay_order_id').value = orderId;
-                document.getElementById('payment_amount').value = parseFloat(amount);
-                document.getElementById('payment_form').submit();
-            } else {
-                alert('Vui lòng nhập số tiền hợp lệ.');
-            }
+            document.getElementById('pay_order_id').value = orderId;
+            document.getElementById('remaining_balance').innerText = remainingBalance.toFixed(2);
+            document.getElementById('paymentModal').style.display = 'block';
+        }
+
+        function closePaymentModal() {
+            document.getElementById('paymentModal').style.display = 'none';
         }
 
         function openDeleteModal(orderId) {
@@ -261,6 +256,20 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
         </div>
     </div>
 
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closePaymentModal()">&times;</span>
+            <h2>Thanh Toán Đơn Hàng</h2>
+            <form id="paymentForm" method="POST">
+                <input type="hidden" name="pay_order_id" id="pay_order_id">
+                <label for="payment_amount">Số Tiền Thanh Toán:</label>
+                <input type="number" name="payment_amount" id="payment_amount" step="0.01" required>
+                <p>Số tiền tối đa: $<span id="remaining_balance"></span></p>
+                <button type="submit">Xác Nhận</button>
+            </form>
+        </div>
+    </div>
+
     <div id="deleteOrderModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeDeleteModal()">&times;</span>
@@ -268,7 +277,7 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
             <form id="deleteOrderForm" method="POST">
                 <input type="hidden" name="delete_order_id" id="delete_order_id">
                 <label for="cancellation_reason">Lý Do Hủy Đơn:</label>
-                <textarea name="cancellation_reason" id="cancellation_reason" rows="4" required></textarea>
+                <textarea name="cancellation_reason" id="cancellation_reason" rows="5" cols="55"></textarea>
                 <button type="submit">Xác Nhận</button>
             </form>
         </div>
