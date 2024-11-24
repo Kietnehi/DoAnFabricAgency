@@ -73,8 +73,21 @@ $orders = $order_stmt->fetchAll(PDO::FETCH_ASSOC);
                 <tr id="details-<?= $order['order_id']; ?>" class="details-container" style="display: none;">
                 <td colspan="6">
     <h3>Thông Tin Đơn Hàng</h3>
+    <p><strong>Nhân viên:</strong>
+    <?php
+    $employee_stmt = $conn->prepare("
+        SELECT e.Fname, e.Lname
+        FROM employee e
+        JOIN orders o ON e.ECode = o.ECode
+        WHERE o.OCode = ?
+    ");
+    $employee_stmt->execute([$order['order_id']]);
+    $employee = $employee_stmt->fetch(PDO::FETCH_ASSOC);
+    ?>
+    <?= htmlspecialchars($employee['Fname'] . " " . $employee['Lname'] ?? 'Chưa có nhân viên xử lý'); ?>
     <p><strong>Thời Gian Xử Lý:</strong> <?= htmlspecialchars($order['HandleTime'] ?? 'Chưa xử lý'); ?></p>
     <p><strong>Trạng Thái:</strong> <?= htmlspecialchars($order['status']); ?></p>
+    
 
     <h3>Chi Tiết Sản Phẩm</h3>
     <table class="nested-table">
