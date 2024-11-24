@@ -40,80 +40,82 @@ $partner_staff = $staff_stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="supplier_details.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <title>Chi tiết nhà cung cấp</title>
     <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-        }
-        img {
-            border-radius: 5px;
-        }
         .no-data {
             text-align: center;
             font-style: italic;
             color: gray;
         }
+        .supplier-details {
+            margin-top: 20px;
+        }
+        .product-table img {
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
-    <h2>Chi tiết nhà cung cấp: <?= htmlspecialchars($supplier['Name']); ?></h2>
-    <p><strong>Địa chỉ:</strong> <?= htmlspecialchars($supplier['Address']); ?></p>
-    <p><strong>Số điện thoại:</strong> <?= htmlspecialchars($supplier['Phone']); ?></p>
-    <p><strong>Mã số thuế:</strong> <?= htmlspecialchars($supplier['TaxCode']); ?></p>
-    <p><strong>Tài khoản ngân hàng:</strong> <?= htmlspecialchars($supplier['BankAccount']); ?></p>
+    <div class="container supplier-details">
+        <h2 class="text-center mb-4">Chi tiết nhà cung cấp: <?= htmlspecialchars($supplier['Name']); ?></h2>
+        <div class="card mb-4">
+            <div class="card-body">
+                <p><strong>Địa chỉ:</strong> <?= htmlspecialchars($supplier['Address']); ?></p>
+                <p><strong>Số điện thoại:</strong> <?= htmlspecialchars($supplier['Phone']); ?></p>
+                <p><strong>Mã số thuế:</strong> <?= htmlspecialchars($supplier['TaxCode']); ?></p>
+                <p><strong>Tài khoản ngân hàng:</strong> <?= htmlspecialchars($supplier['BankAccount']); ?></p>
+                <?php if (isset($partner_staff[0])): ?>
+                <p><strong>Nhân viên đối tác:</strong> NV <?= htmlspecialchars($partner_staff[0]['ECode']); ?> - <?= htmlspecialchars($partner_staff[0]['Fname'] . " " . $partner_staff[0]['Lname']); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
 
-    <?php if (isset($partner_staff[0])): ?>
-    <p><strong>Nhân viên đối tác:</strong> NV <?= htmlspecialchars($partner_staff[0]['ECode']); ?> - <?= htmlspecialchars($partner_staff[0]['Fname'] . " " . $partner_staff[0]['Lname']); ?></p>
-    <?php endif; ?>
+        <h3 class="mb-3">Các sản phẩm được cung cấp</h3>
+        <?php if (count($products) > 0): ?>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover product-table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Mã sản phẩm</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Màu sắc</th>
+                            <th>Giá</th>
+                            <th>Ngày áp dụng</th>
+                            <th>Số lượng</th>
+                            <th>Hình ảnh</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($products as $product): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($product['CCode']); ?></td>
+                            <td><?= htmlspecialchars($product['ProductName']); ?></td>
+                            <td><?= htmlspecialchars($product['Color']); ?></td>
+                            <td><?= number_format($product['Price'], 2); ?> USD</td>
+                            <td><?= htmlspecialchars($product['AppliedDate']); ?></td>
+                            <td><?= htmlspecialchars($product['RemainQuantity']); ?></td>
+                            <td>
+                                <?php if ($product['img']): ?>
+                                    <img src="img/<?= htmlspecialchars($product['img']); ?>" alt="Hình ảnh sản phẩm" width="50">
+                                <?php else: ?>
+                                    <p class="no-data">Chưa có hình ảnh</p>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php else: ?>
+            <p class="no-data">Nhà cung cấp này chưa cung cấp sản phẩm nào.</p>
+        <?php endif; ?>
 
-
-
-
-    <h3>Các sản phẩm được cung cấp</h3>
-    <?php if (count($products) > 0): ?>
-        <table>
-            <thead>
-                <tr>
-                    <th>Mã sản phẩm</th>
-                    <th>Tên sản phẩm</th>
-                    <th>Màu sắc</th>
-                    <th>Giá</th>
-                    <th>Ngày áp dụng</th>
-                    <th>Số lượng</th>
-                    <th>Hình ảnh</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($products as $product): ?>
-                <tr>
-                    <td><?= htmlspecialchars($product['CCode']); ?></td>
-                    <td><?= htmlspecialchars($product['ProductName']); ?></td>
-                    <td><?= htmlspecialchars($product['Color']); ?></td>
-                    <td><?= number_format($product['Price'], 2); ?> USD</td>
-                    <td><?= htmlspecialchars($product['AppliedDate']); ?></td>
-                    <td><?= htmlspecialchars($product['RemainQuantity']); ?></td>
-                    <td>
-                        <?php if ($product['img']): ?>
-                            <img src="img/<?= htmlspecialchars($product['img']); ?>" alt="Hình ảnh sản phẩm" width="50">
-                        <?php else: ?>
-                            <p class="no-data">Chưa có hình ảnh</p>
-                        <?php endif; ?>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    <?php else: ?>
-        <p class="no-data">Nhà cung cấp này chưa cung cấp sản phẩm nào.</p>
-    <?php endif; ?>
-
-    <a href="product_manager.php" class="btn btn-primary">Quay lại</a>
+        <a href="product_manager.php" class="btn btn-primary mt-3"><i class="fas fa-arrow-left"></i> Quay lại</a>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
