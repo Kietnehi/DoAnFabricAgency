@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1:3307
--- Thời gian đã tạo: Th10 24, 2024 lúc 03:52 AM
+-- Thời gian đã tạo: Th10 24, 2024 lúc 01:57 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -289,7 +289,8 @@ INSERT INTO `supplier` (`SCode`, `Name`, `Address`, `BankAccount`, `TaxCode`, `P
 (2, 'XYZ Materials', '456 Warehouse Ln', '987-654-321', 'TAX002', '444555666', 3),
 (3, 'Global Textiles', '789 Fabric Blvd', '456-789-123', 'TAX003', '777888999', 4),
 (4, 'Prime Fabrics', '987 Silk Ave', '789-123-456', 'TAX004', '555666777', 4),
-(5, '1', '1', '1', '1', '1', 4);
+(5, '1', '1', '1', '1', '1', 4),
+(1001, 'Công ty TNHH MTV Carot', '123 Đường ABC, Thành phố XYZ', '0123456789', '987654321', '0123456789', 4);
 
 -- --------------------------------------------------------
 
@@ -332,8 +333,7 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `username`, `password_hash`) VALUES
 (1, 'admin', '$2y$10$fSXilBpCLsuqIle4zyi7ne5MMTHNS8/HUGVuowtsgRlrYNFhD2eqO'),
-(2, 'phat', 'cb83aea2a76c47853d1bad74f3ee82157afb34c62dd1e0a37a1f03fdcec520c9'),
-(3, 'kiet', '1e5058d9633ee8a85d76fb0d883720b33721471180e28bdcb5869e17da86cebe');
+(6, 'NhatQuyenIT', '$2y$10$yoazo7wtaRzi31e7d/UvzeuB.kS7LB/OhL23LvvOAWWH0fdRp.Yt.');
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -344,14 +344,16 @@ INSERT INTO `users` (`id`, `username`, `password_hash`) VALUES
 --
 ALTER TABLE `bolt`
   ADD PRIMARY KEY (`BCode`),
-  ADD KEY `CCode` (`CCode`);
+  ADD KEY `CCode` (`CCode`),
+  ADD KEY `idx_bolt_bcode` (`BCode`);
 
 --
 -- Chỉ mục cho bảng `category`
 --
 ALTER TABLE `category`
   ADD PRIMARY KEY (`CCode`),
-  ADD KEY `SCode` (`SCode`);
+  ADD KEY `SCode` (`SCode`),
+  ADD KEY `idx_category_ccode` (`CCode`);
 
 --
 -- Chỉ mục cho bảng `customer`
@@ -385,7 +387,8 @@ ALTER TABLE `employee`
 ALTER TABLE `orders`
   ADD PRIMARY KEY (`OCode`),
   ADD KEY `ECode` (`ECode`),
-  ADD KEY `CusId` (`CusId`);
+  ADD KEY `CusId` (`CusId`),
+  ADD KEY `idx_orders_cusid` (`CusId`);
 
 --
 -- Chỉ mục cho bảng `order_detail`
@@ -393,7 +396,8 @@ ALTER TABLE `orders`
 ALTER TABLE `order_detail`
   ADD PRIMARY KEY (`DetailId`),
   ADD KEY `OCode` (`OCode`),
-  ADD KEY `BCode` (`BCode`);
+  ADD KEY `BCode` (`BCode`),
+  ADD KEY `idx_orderdetail_ocode` (`OCode`);
 
 --
 -- Chỉ mục cho bảng `supplier`
@@ -464,13 +468,13 @@ ALTER TABLE `order_detail`
 -- AUTO_INCREMENT cho bảng `supplier`
 --
 ALTER TABLE `supplier`
-  MODIFY `SCode` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `SCode` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1002;
 
 --
 -- AUTO_INCREMENT cho bảng `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- Các ràng buộc cho các bảng đã đổ

@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <?php endif; ?>
         </div>
         <div id="image-container">
-            <img src="img/login.png" alt="Cửa hàng vải">
+            <img src="img/img10.png" alt="Cửa hàng vải">
         </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
