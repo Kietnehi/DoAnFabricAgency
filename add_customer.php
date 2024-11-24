@@ -67,7 +67,7 @@ ob_end_flush();
 <head>
     <meta charset="UTF-8">
     <title>Thêm Khách Hàng</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         .checkbox-group {
             display: flex;
@@ -83,8 +83,8 @@ ob_end_flush();
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Thêm Khách Hàng Mới</h2>
+    <div class="container mt-5">
+        <h2 class="mb-4 text-center">Thêm Khách Hàng Mới</h2>
         <form action="add_customer.php" method="POST">
             <div class="form-group">
                 <label for="fname">Tên:</label>
@@ -102,10 +102,6 @@ ob_end_flush();
                 <label for="phone">Số Điện Thoại:</label>
                 <input type="text" class="form-control" id="phone" name="phone" required>
             </div>
-            <!-- <div class="form-group">
-                <label for="dept">Công Nợ (USD):</label>
-                <input type="number" class="form-control" id="dept" name="dept" step="0.01" required>
-            </div> -->
             <div class="form-group">
                 <label for="ecode">Nhân Viên Chăm Sóc:</label>
                 <select class="form-control" id="ecode" name="ecode" required>
@@ -117,20 +113,13 @@ ob_end_flush();
                     <?php endforeach; ?>
                 </select>
             </div>
-            <!-- <div class="checkbox-group">
-                <input type="checkbox" id="alert" name="alert" value="1" disabled>
-                <label for="alert">Trạng Thái Cảnh Báo</label>
-                <small id="alert-warning" class="alert-warning"></small>
-            </div>
-            <div class="checkbox-group">
-                <input type="checkbox" id="bad_debt" name="bad_debt" value="1" disabled>
-                <label for="bad_debt">Nợ Xấu</label>
-                <small id="bad-debt-warning" class="bad-debt-warning"></small>
-            </div> -->
             <button type="submit" class="btn btn-primary">Thêm Khách Hàng</button>
         </form>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
         const deptInput = document.getElementById('dept');
         const alertCheckbox = document.getElementById('alert');

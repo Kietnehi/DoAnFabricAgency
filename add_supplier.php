@@ -41,7 +41,7 @@ ob_end_flush();
 <head>
     <meta charset="UTF-8">
     <title>Thêm Nhà Cung Cấp</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         .alert-success {
             margin-top: 20px;
@@ -50,28 +50,23 @@ ob_end_flush();
     </style>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // Lấy phần tử thông báo
             const alertBox = document.querySelector('.alert-success');
-
-            // Nếu thông báo tồn tại, đặt timeout để ẩn nó sau 3 giây
             if (alertBox) {
                 setTimeout(() => {
-                    alertBox.style.opacity = '0'; // Giảm opacity để tạo hiệu ứng
-                    setTimeout(() => alertBox.remove(), 500); // Xóa phần tử sau khi ẩn
-                }, 3000); // 3 giây
+                    alertBox.style.opacity = '0';
+                    setTimeout(() => alertBox.remove(), 500);
+                }, 3000);
             }
         });
     </script>
 </head>
 <body>
-    <div class="container">
-        <h2>Thêm Nhà Cung Cấp Mới</h2>
+    <div class="container mt-5">
+        <h2 class="mb-4 text-center">Thêm Nhà Cung Cấp Mới</h2>
 
         <?php
-        // Hiển thị thông báo thành công nếu có
         if (isset($_SESSION['success_message'])) {
-            echo "<div class='alert alert-success'>{$_SESSION['success_message']}</div>";
-            // Xóa thông báo sau khi hiển thị
+            echo "<div class='alert alert-success text-center'>{$_SESSION['success_message']}</div>";
             unset($_SESSION['success_message']);
         }
         ?>
@@ -101,7 +96,6 @@ ob_end_flush();
                 <label for="ecode">Nhân Viên Đối Tác:</label>
                 <select class="form-control" id="ecode" name="ecode" required>
                     <?php
-                    // Lấy danh sách nhân viên từ bảng `employee`
                     $stmt = $conn->query("SELECT ECode, CONCAT(Fname, ' ', Lname) AS FullName FROM employee WHERE Role='PartnerStaff'");
                     $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     foreach ($employees as $employee) {
@@ -113,5 +107,8 @@ ob_end_flush();
             <button type="submit" class="btn btn-primary">Thêm Nhà Cung Cấp</button>
         </form>
     </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

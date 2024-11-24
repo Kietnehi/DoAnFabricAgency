@@ -72,6 +72,69 @@ ob_end_flush();
     <title>Sửa Đơn Hàng</title>
     <link rel="stylesheet" href="styles.css">
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        input, select, textarea, button {
+            margin-top: 5px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
         /* Modal alert CSS */
         #alertModal {
             display: none;
@@ -130,48 +193,50 @@ ob_end_flush();
         </div>
     </div>
 
-    <h1>Sửa Đơn Hàng</h1>
-    <form action="edit_order.php?id=<?= $order_id ?>" method="POST">
-        <label for="customer_id">Khách Hàng:</label>
-        <select name="customer_id" required>
-            <?php foreach ($customers as $customer): ?>
-                <option value="<?= $customer['CusId']; ?>" <?= $customer['CusId'] == $order['CusId'] ? 'selected' : '' ?>>
-                    <?= $customer['Fname'] . " " . $customer['Lname']; ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+    <div class="container">
+        <h1>Sửa Đơn Hàng</h1>
+        <form action="edit_order.php?id=<?= $order_id ?>" method="POST">
+            <label for="customer_id">Khách Hàng:</label>
+            <select name="customer_id" required>
+                <?php foreach ($customers as $customer): ?>
+                    <option value="<?= $customer['CusId']; ?>" <?= $customer['CusId'] == $order['CusId'] ? 'selected' : '' ?>>
+                        <?= $customer['Fname'] . " " . $customer['Lname']; ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
 
-        <label for="employee_id">Nhân Viên:</label>
-        <select name="employee_id" required>
-            <?php foreach ($employees as $employee): ?>
-                <option value="<?= $employee['ECode']; ?>" <?= $employee['ECode'] == $order['ECode'] ? 'selected' : '' ?>>
-                    <?= $employee['Fname'] . " " . $employee['Lname']; ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+            <label for="employee_id">Nhân Viên:</label>
+            <select name="employee_id" required>
+                <?php foreach ($employees as $employee): ?>
+                    <option value="<?= $employee['ECode']; ?>" <?= $employee['ECode'] == $order['ECode'] ? 'selected' : '' ?>>
+                        <?= $employee['Fname'] . " " . $employee['Lname']; ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
 
-        <label for="order_date">Ngày Đặt Hàng:</label>
-        <input type="datetime-local" name="order_date" value="<?= date('Y-m-d\TH:i', strtotime($order['OrderTime'])); ?>" required>
+            <label for="order_date">Ngày Đặt Hàng:</label>
+            <input type="datetime-local" name="order_date" value="<?= date('Y-m-d\TH:i', strtotime($order['OrderTime'])); ?>" required>
 
-        <label for="total_price">Tổng Tiền:</label>
-        <input type="number" name="total_price" step="0.01" value="<?= $order['TotalPrice']; ?>" required>
+            <label for="total_price">Tổng Tiền:</label>
+            <input type="number" name="total_price" step="0.01" value="<?= $order['TotalPrice']; ?>" required>
 
-        <label for="status">Trạng Thái:</label>
-        <select name="status" required onchange="toggleCancellationReason(this.value)">
-            <option value="new" <?= $order['Status'] == 'new' ? 'selected' : '' ?>>New</option>
-            <option value="ordered" <?= $order['Status'] == 'ordered' ? 'selected' : '' ?>>Ordered</option>
-            <option value="partial_payment" <?= $order['Status'] == 'partial_payment' ? 'selected' : '' ?>>Partial Payment</option>
-            <option value="paid" <?= $order['Status'] == 'paid' ? 'selected' : '' ?>>Paid</option>
-            <option value="cancelled" <?= $order['Status'] == 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
-        </select>
+            <label for="status">Trạng Thái:</label>
+            <select name="status" required onchange="toggleCancellationReason(this.value)">
+                <option value="new" <?= $order['Status'] == 'new' ? 'selected' : '' ?>>New</option>
+                <option value="ordered" <?= $order['Status'] == 'ordered' ? 'selected' : '' ?>>Ordered</option>
+                <option value="partial_payment" <?= $order['Status'] == 'partial_payment' ? 'selected' : '' ?>>Partial Payment</option>
+                <option value="paid" <?= $order['Status'] == 'paid' ? 'selected' : '' ?>>Paid</option>
+                <option value="cancelled" <?= $order['Status'] == 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
+            </select>
 
-        <div id="cancellation_reason_field" style="display: <?= $order['Status'] === 'cancelled' ? 'block' : 'none'; ?>;">
-            <label for="cancellation_reason">Lý Do Hủy Đơn:</label>
-            <textarea name="cancellation_reason" id="cancellation_reason" rows="4"><?= htmlspecialchars($order['Cancellation_Reason']); ?></textarea>
-        </div>
+            <div id="cancellation_reason_field" style="display: <?= $order['Status'] === 'cancelled' ? 'block' : 'none'; ?>;">
+                <label for="cancellation_reason">Lý Do Hủy Đơn:</label>
+                <textarea name="cancellation_reason" id="cancellation_reason" rows="4"><?= htmlspecialchars($order['Cancellation_Reason']); ?></textarea>
+            </div>
 
-        <button type="submit">Lưu Thay Đổi</button>
-    </form>
-    <a href="orders.php">Quay lại Danh Sách Đơn Hàng</a>
+            <button type="submit">Lưu Thay Đổi</button>
+        </form>
+        <a href="orders.php" class="back-link">Quay lại Danh Sách Đơn Hàng</a>
+    </div>
 </body>
 </html>
