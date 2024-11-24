@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 23, 2024 lúc 09:39 AM
+-- Máy chủ: 127.0.0.1:3307
+-- Thời gian đã tạo: Th10 24, 2024 lúc 03:52 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -69,10 +69,10 @@ CREATE TABLE `category` (
 INSERT INTO `category` (`CCode`, `Name`, `Color`, `RemainQuantity`, `Price`, `AppliedDate`, `SCode`, `img`) VALUES
 (1, 'Silk', 'Red', 98, 25.00, '2023-01-13', 4, 'img9.jpg'),
 (2, 'Kaki', 'Green', 193, 30.00, '2023-02-01', 1, 'img2.jpg'),
-(3, 'Embroidered', 'Blue', 141, 35.00, '2023-03-01', 2, 'img3.jpg'),
-(4, 'Jacquard', 'Yellow', 92, 18.00, '2023-04-01', 2, 'img4.jpg'),
+(3, 'Embroidered', 'Blue', 139, 35.00, '2023-03-01', 2, 'img3.jpg'),
+(4, 'Jacquard', 'Yellow', 91, 18.00, '2023-04-01', 2, 'img4.jpg'),
 (5, 'Polyester', 'Black', 289, 40.00, '2023-05-01', 3, 'img5.jpg'),
-(6, 'Linen', 'White', 242, 12.00, '2023-06-01', 3, 'img6.jpg');
+(6, 'Linen', 'White', 241, 12.00, '2023-06-01', 3, 'img6.jpg');
 
 -- --------------------------------------------------------
 
@@ -98,9 +98,10 @@ INSERT INTO `customer` (`CusId`, `Fname`, `Lname`, `Phone`, `Address`, `Dept`, `
 (1, 'Tom', 'Hanks', '333444555', '123 River St', 1.00, 5),
 (2, 'Emma', 'Stone', '777888999', '456 Mountain Rd', 0.00, 5),
 (3, 'Chris', 'Evans', '111222333', '789 Hill Ln', 20.00, 5),
-(11, 'Fat', 'Le', '12383838', '123 trung son', 0.00, 2),
-(12, 'Kiet', 'Truong', '12937736', '123j ksjdf', 0.00, 2),
-(13, 'Quyen', 'Le', '12739123', 'klj3213', 3000.00, 2);
+(11, 'Phát', 'Lê', '12383838', '123 trung son', 3000.00, 2),
+(12, 'Kiệt', 'Trương', '12937736', '123j ksjdf', 5000.00, 2),
+(13, 'Quyền', 'Lê', '12739123', 'klj3213', 1000.00, 2),
+(14, 'Trí', 'Trần', '12478395', '273 An Dương Vương P3, Q.5', 4000.00, 2);
 
 -- --------------------------------------------------------
 
@@ -123,9 +124,10 @@ INSERT INTO `customerstatus` (`CusId`, `Alert`, `BadDebt`, `AlertStartDate`) VAL
 (1, 0, 0, NULL),
 (2, 0, 0, '2024-01-01'),
 (3, 0, 0, '2024-01-01'),
-(11, 0, 0, NULL),
-(12, 0, 0, NULL),
-(13, 1, 0, NULL);
+(11, 1, 0, '2024-11-24'),
+(12, 1, 0, '2024-11-24'),
+(13, 0, 0, '2024-11-24'),
+(14, 1, 0, '2024-11-24');
 
 -- --------------------------------------------------------
 
@@ -228,7 +230,8 @@ INSERT INTO `orders` (`OCode`, `TotalPrice`, `OrderTime`, `Status`, `HandleTime`
 (10, 90.00, '2024-11-22 03:47:41', 'cancelled', '2024-11-22 03:47:41', 6, 1, 'quá tệ '),
 (11, 90.00, '2024-11-22 23:04:00', 'partial_payment', '2024-11-22 23:04:38', 7, 11, ''),
 (12, 60.00, '2024-11-22 23:06:02', 'new', '2024-11-22 23:06:02', 6, 1, NULL),
-(13, 86.00, '2024-11-23 00:41:23', 'partial_payment', '2024-11-23 00:41:23', 7, 12, NULL);
+(13, 86.00, '2024-11-23 00:41:23', 'partial_payment', '2024-11-23 00:41:23', 7, 12, NULL),
+(14, 100.00, '2024-11-23 20:48:42', 'new', '2024-11-23 20:48:42', 7, 14, NULL);
 
 -- --------------------------------------------------------
 
@@ -256,7 +259,10 @@ INSERT INTO `order_detail` (`DetailId`, `OCode`, `BCode`, `Quantity`, `UnitPrice
 (8, 11, 4, 5, 18.00, 90.00),
 (9, 12, 2, 2, 30.00, 60.00),
 (10, 13, 1, 2, 25.00, 50.00),
-(11, 13, 6, 3, 12.00, 36.00);
+(11, 13, 6, 3, 12.00, 36.00),
+(12, 14, 3, 2, 35.00, 70.00),
+(13, 14, 4, 1, 18.00, 18.00),
+(14, 14, 6, 1, 12.00, 12.00);
 
 -- --------------------------------------------------------
 
@@ -428,7 +434,7 @@ ALTER TABLE `category`
 -- AUTO_INCREMENT cho bảng `customer`
 --
 ALTER TABLE `customer`
-  MODIFY `CusId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `CusId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT cho bảng `customer_partialpayments`
@@ -446,13 +452,13 @@ ALTER TABLE `employee`
 -- AUTO_INCREMENT cho bảng `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `OCode` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `OCode` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT cho bảng `order_detail`
 --
 ALTER TABLE `order_detail`
-  MODIFY `DetailId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `DetailId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT cho bảng `supplier`
@@ -530,4 +536,3 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-
