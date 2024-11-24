@@ -116,11 +116,12 @@ $outstanding_data = array_column($monthly_outstanding_data, 'outstanding');
 <head>
     <meta charset="UTF-8">
     <title>Quản lý Fabric Agency - Bảng Điều Khiển</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> -->
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -138,7 +139,7 @@ $outstanding_data = array_column($monthly_outstanding_data, 'outstanding');
         <div class="row">
             <div class="col-md-4">
                 <div class="stat-card" data-aos="fade-up">
-                    <span class="stat-icon glyphicon glyphicon-user"></span>
+                <i class="fa fa-users fa-3x" aria-hidden="true" style="margin-right: 10px;"></i>
                     <div class="stat-content">
                         <h3><?php echo $customer_count; ?></h3>
                         <p>Khách Hàng</p>
@@ -147,7 +148,7 @@ $outstanding_data = array_column($monthly_outstanding_data, 'outstanding');
             </div>
             <div class="col-md-4">
                 <div class="stat-card" data-aos="fade-up">
-                    <span class="stat-icon glyphicon glyphicon-shopping-cart"></span>
+                <i class="fa fa-shopping-cart fa-3x" aria-hidden="true" style="margin-right: 10px;"></i>
                     <div class="stat-content">
                         <h3><?php echo $order_count; ?></h3>
                         <p>Đơn Hàng</p>
@@ -156,7 +157,7 @@ $outstanding_data = array_column($monthly_outstanding_data, 'outstanding');
             </div>  
             <div class="col-md-4">
                 <div class="stat-card" data-aos="fade-up">
-                    <span class="stat-icon glyphicon glyphicon-usd"></span>
+                <i class="fas fa-money-bill fa-3x" aria-hidden="true" style="margin-right: 10px;"></i>
                     <div class="stat-content">
                         <h3><?php echo number_format($total_revenue, 2); ?> USD</h3>
                         <p>Doanh Thu Tổng</p>
@@ -170,8 +171,8 @@ $outstanding_data = array_column($monthly_outstanding_data, 'outstanding');
             <label for="start_date">Từ ngày:</label>
             <input type="text" name="start_date" id="start_date" class="form-control" value="<?php echo htmlspecialchars($start_date); ?>" placeholder="yyyy-mm-dd">
             <label for="end_date">Đến ngày:</label>
-            <input type="text" name="end_date" id="end_date" class="form-control" value="<?php echo htmlspecialchars($end_date); ?>" placeholder="yyyy-mm-dd">
-            <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-filter"></i>Lọc</button>
+            <input type="text" name="end_date" id="end_date" class="form-control" style="display:inline-block;" value="<?php echo htmlspecialchars($end_date); ?>" placeholder="yyyy-mm-dd">
+            <button type="submit" class="btn btn-primary"><i class="fa fa-filter" aria-hidden="true"></i>Lọc</button>
         </form>
         <div class="notifications">
             <h3>Thông Báo</h3>
