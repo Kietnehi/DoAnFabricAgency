@@ -36,6 +36,7 @@ if (!isset($_SESSION['user_id'])) {
                 <li class="nav-item"><a class="nav-link" href="create_order.php"><i class="fas fa-plus-circle"></i> Tạo Đơn hàng</a></li>
                 <li class="nav-item"><a class="nav-link" href="product_manager.php"><i class="fas fa-box-open"></i> Sản phẩm</a></li>
                 <li class="nav-item"><a class="nav-link" href="employees.php"><i class="fas fa-user-tie"></i> Nhân viên</a></li>
+                <li class="nav-item"><a class="nav-link" href="supplier.php"><i class="fas fa-truck"></i> Quản lý Nhà cung cấp</a></li>
             </ul>
 
             <!-- Action Buttons -->
