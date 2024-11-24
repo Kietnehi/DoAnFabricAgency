@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body>
     <div id="wrapper">
         <form action="login.php" method="POST" id="form-login">
-            <h1 class="form-heading">Form đăng nhập</h1>
+            <h1 class="form-heading">Đăng nhập</h1>
             <div class="form-group">
                 <i class="far fa-user"></i>
                 <input type="text" name="username" class="form-input" placeholder="Tên đăng nhập" required>
