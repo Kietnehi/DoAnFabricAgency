@@ -72,37 +72,3 @@ table th, table td {
 .table tbody tr:nth-child(even) {
     background-color: #ffffff; /* Màu nền cho hàng chẵn */
 }
-
-/* Style cho nút xóa */
-.delete {
-    background: #f44336; /* Màu đỏ */
-    color: white;
-    border: none;
-    padding: 4px 8px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s, transform 0.2s;
-    margin-top: 10px;
-}
-
-.delete:hover {
-    background: #d32f2f; /* Màu đỏ đậm hơn khi hover */
-    transform: scale(1.05); /* Nút lớn hơn một chút khi hover */
-    margin-top: 10px;
-}
-
-/* Style cho nút sửa */
-.edit {
-    background: #4CAF50; /* Màu xanh lá cây */
-    color: white;
-    border: none;
-    padding: 4px 8px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s, transform 0.2s;
-}
-
-.edit:hover {
-    background: #45a049; /* Màu xanh lá cây đậm hơn khi hover */
-    transform: scale(1.05); /* Nút lớn hơn một chút khi hover */
-}
