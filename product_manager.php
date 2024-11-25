@@ -221,7 +221,7 @@ include 'nav.php';
     <h2>Danh sách sản phẩm</h2>
     <div class="search-container">
         <form method="GET" action="product_manager.php">
-            <input type="text" name="search" value="<?= htmlspecialchars($search); ?>" placeholder="Nhập mã, tên sản phẩm hoặc nhà cung cấp...">
+            <input type="text" name="search" value="<?= htmlspecialchars($search); ?>" placeholder="Nhập mã, tên sản phẩm hoặc tên nhà cung cấp">
             <button type="submit">Tìm kiếm</button>
         </form>
     </div>

@@ -51,6 +51,69 @@ $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="supplier.css">
+    <style>
+        /* Style cho nút xóa */
+        .btn-delete {
+            background: #f44336;
+            /* Màu đỏ */
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.2s;
+            margin: 5px;
+        }
+
+        .btn-delete:hover {
+            background: #d32f2f;
+            /* Màu đỏ đậm hơn khi hover */
+            transform: scale(1.05);
+            /* Nút lớn hơn một chút khi hover */
+            margin: 5px;
+            color: white;
+        }
+
+        /* Style cho nút sửa */
+        .btn-edit {
+            background: #4CAF50;
+            /* Màu xanh lá cây */
+            margin: 5px;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .btn-edit:hover {
+            background: #45a049;
+            /* Màu xanh lá cây đậm hơn khi hover */
+            transform: scale(1.05);
+            /* Nút lớn hơn một chút khi hover */
+            margin: 5px;
+            color: white;
+        }
+
+        .btn-view-details {
+            background-color: #17a2b8;
+            margin: 5px;
+            color: white;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-view-details:hover {
+            background-color: #138496;
+            color: white;
+            margin: 5px;
+        }
+
+        .btn,a i {
+            margin-right: 5px;
+        }
+    </style>
 </head>
 
 <body>
@@ -84,8 +147,9 @@ $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <td><?php echo htmlspecialchars($row['TaxCode']); ?></td>
                         <td><?php echo htmlspecialchars($row['Phone']); ?></td>
                         <td>
-                            <a href="edit_supplier.php?id=<?php echo $row['SCode']; ?>" class="btn btn-sm edit"><i class="fas fa-edit"></i>sửa</a>
-                            <a href="delete_supplier.php?id=<?php echo $row['SCode']; ?>" class="btn btn-sm delete" onclick="return confirm('Bạn có chắc chắn muốn xóa nhà cung cấp này?');"><i class="fas fa-trash"></i> Xóa</a>
+                            <a href="edit_supplier.php?id=<?php echo $row['SCode']; ?>" class="btn btn-sm btn-edit"><i class="fas fa-edit"></i> sửa</a>
+                            <a href="delete_supplier.php?id=<?php echo $row['SCode']; ?>" class="btn btn-sm btn-delete" onclick="return confirm('Bạn có chắc chắn muốn xóa nhà cung cấp này?');"><i class="fas fa-trash"></i> Xóa</a>
+                            <button class="btn btn-sm btn-view-details" data-bs-toggle="modal" data-bs-target="#viewProductsModal" data-id="<?php echo $row['SCode']; ?>"><i class="fas fa-eye"></i> Xem chi tiết</button>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -102,9 +166,49 @@ $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </ul>
         </nav>
     </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="viewProductsModal" tabindex="-1" aria-labelledby="viewProductsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewProductsModalLabel">Chi tiết sản phẩm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="productsContent"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var viewProductsModal = document.getElementById('viewProductsModal');
+            viewProductsModal.addEventListener('show.bs.modal', function(event) {
+                var button = event.relatedTarget;
+                var supplierId = button.getAttribute('data-id');
+
+                var modalTitle = viewProductsModal.querySelector('.modal-title');
+                var modalBody = viewProductsModal.querySelector('.modal-body #productsContent');
+
+                var supplierName = button.closest('tr').querySelector('td:nth-child(2)').textContent;
+                modalTitle.textContent = 'Chi tiết sản phẩm của nhà cung cấp ' + supplierName;
+
+                fetch('fetch_products.php?id=' + supplierId)
+                    .then(response => response.text())
+                    .then(data => {
+                        modalBody.innerHTML = data;
+                    });
+            });
+        });
+    </script>
 </body>
 
 </html>
