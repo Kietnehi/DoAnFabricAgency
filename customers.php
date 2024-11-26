@@ -142,9 +142,12 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
                         <td><?= htmlspecialchars($customer['EmployeeInfo'] ?? 'Không xác định'); ?></td>
                         <td>
                             <a href="edit_customer.php?id=<?= $customer['CusId']; ?>" class="btn-edit">Sửa</a>
-                            <a href="delete_customer.php?id=<?= $customer['CusId']; ?>" class="btn-delete" onclick="return confirm('Bạn có chắc chắn muốn xóa khách hàng này?');">Xóa</a>
+                            <?php if ($customer['Dept'] < 1): ?>
+                                <a href="delete_customer.php?id=<?= $customer['CusId']; ?>" class="btn-delete" onclick="return confirm('Bạn có chắc chắn muốn xóa khách hàng này?');">Xóa</a>
+                            <?php else: ?>
+                                <span class="btn-delete disabled" title="Không thể xóa khách hàng có công nợ lớn hơn 1">Xóa</span>
+                            <?php endif; ?>
                         </td>
-
                     </tr>
                 <?php endforeach; ?>
             <?php else: ?>
