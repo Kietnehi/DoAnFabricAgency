@@ -242,7 +242,7 @@ ob_end_flush();
 
             <button type="submit">Lưu Thay Đổi</button>
         </form>
-        <a href="customers.php">Quay lại Danh Sách Khách Hàng</a>
+        <a href="customers.php" style="color: #fff;">Quay lại Danh Sách Khách Hàng</a>
     </div>
 </body>
 </html>

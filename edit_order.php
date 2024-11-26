@@ -236,7 +236,7 @@ ob_end_flush();
 
             <button type="submit">Lưu Thay Đổi</button>
         </form>
-        <a href="orders.php" class="back-link">Quay lại Danh Sách Đơn Hàng</a>
+        <a href="orders.php" class="back-link" style="color: #fff;">Quay lại Danh Sách Đơn Hàng</a>
     </div>
 </body>
 </html>
