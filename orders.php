@@ -14,41 +14,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay_order_id'])) {
     $payment_amount = floatval($_POST['payment_amount']);
 
     // Lấy tổng tiền đơn hàng và thông tin khách hàng
-    $order_stmt = $conn->prepare("SELECT TotalPrice, CusId FROM orders WHERE OCode = :order_id");
+    $order_stmt = $conn->prepare("SELECT TotalPrice, CusId, Status FROM orders WHERE OCode = :order_id");
     $order_stmt->execute(['order_id' => $order_id]);
     $order = $order_stmt->fetch(PDO::FETCH_ASSOC);
 
-    $total_price = $order['TotalPrice'];
-    $cus_id = $order['CusId'];
-
-    // Lấy tổng tiền đã thanh toán cho đơn hàng này
-    $paid_stmt = $conn->prepare("SELECT COALESCE(SUM(Amount), 0) FROM customer_partialpayments WHERE OCode = :order_id");
-    $paid_stmt->execute(['order_id' => $order_id]);
-    $total_paid = $paid_stmt->fetchColumn();
-
-    $remaining_balance = $total_price - $total_paid;
-
-    if ($payment_amount > $remaining_balance) {
-        echo "<script>alert('Số tiền thanh toán vượt quá số dư. Vui lòng thử lại.');</script>";
-    } else {
-        // Lưu lịch sử thanh toán vào bảng customer_partialpayments
-        $stmt = $conn->prepare("INSERT INTO customer_partialpayments (CusId, OCode, PaymentTime, Amount) VALUES (:cus_id, :order_id, NOW(), :amount)");
-        $stmt->execute(['cus_id' => $cus_id, 'order_id' => $order_id, 'amount' => $payment_amount]);
-
-        // Tính tổng số tiền đã thanh toán sau khi cập nhật
-        $new_total_paid = $total_paid + $payment_amount;
-
-        if ($new_total_paid == $total_price) {
-            // Nếu thanh toán đủ, cập nhật trạng thái thành `completed`
-            $status_stmt = $conn->prepare("UPDATE orders SET Status = 'completed' WHERE OCode = :order_id");
-            $status_stmt->execute(['order_id' => $order_id]);
-        } elseif ($new_total_paid < $total_price) {
-            // Nếu chưa thanh toán đủ, trạng thái là `partial_payment`
-            $status_stmt = $conn->prepare("UPDATE orders SET Status = 'partial_payment' WHERE OCode = :order_id");
-            $status_stmt->execute(['order_id' => $order_id]);
+    if ($order) {
+        if ($order['Status'] === 'cancelled') {
+            echo "<script>alert('Đơn hàng đã bị hủy. Không thể thanh toán cho đơn hàng này.'); window.location.href = 'orders.php';</script>";
+            exit();
         }
 
-        echo "<script>alert('Thanh toán thành công. Lịch sử đã được lưu.');</script>";
+        $total_price = $order['TotalPrice'];
+        $cus_id = $order['CusId'];
+
+        // Lấy tổng tiền đã thanh toán cho đơn hàng này
+        $paid_stmt = $conn->prepare("SELECT COALESCE(SUM(Amount), 0) AS TotalPaid FROM customer_partialpayments WHERE OCode = :order_id");
+        $paid_stmt->execute(['order_id' => $order_id]);
+        $total_paid = $paid_stmt->fetchColumn();
+
+        $remaining_balance = $total_price - $total_paid;
+
+        if ($payment_amount > $remaining_balance) {
+            echo "<script>alert('Số tiền thanh toán vượt quá số dư. Vui lòng thử lại.');</script>";
+        } else {
+            // Lưu lịch sử thanh toán vào bảng customer_partialpayments
+            $stmt = $conn->prepare("INSERT INTO customer_partialpayments (CusId, OCode, PaymentTime, Amount) VALUES (:cus_id, :order_id, NOW(), :amount)");
+            $stmt->execute(['cus_id' => $cus_id, 'order_id' => $order_id, 'amount' => $payment_amount]);
+
+            // Cập nhật công nợ của khách hàng
+            $update_sql = "UPDATE customer SET Dept = Dept - :amount WHERE CusId = :cus_id";
+            $update_stmt = $conn->prepare($update_sql);
+            $update_stmt->execute(['amount' => $payment_amount, 'cus_id' => $cus_id]);
+
+            // Tính tổng số tiền đã thanh toán sau khi cập nhật
+            $new_total_paid = $total_paid + $payment_amount;
+
+            // Cập nhật trạng thái đơn hàng
+            $order_update_stmt = $conn->prepare("
+                UPDATE orders 
+                SET Status = CASE 
+                    WHEN (SELECT COALESCE(SUM(Amount), 0) FROM customer_partialpayments WHERE OCode = :order_id) >= TotalPrice 
+                    THEN 'completed' 
+                    ELSE 'partial_payment' 
+                END
+                WHERE OCode = :order_id
+            ");
+            $order_update_stmt->execute(['order_id' => $order_id]);
+
+            echo "<script>alert('Thanh toán thành công. Lịch sử đã được lưu.'); window.location.href = 'orders.php';</script>";
+        }
+    } else {
+        echo "<script>alert('Đơn hàng không tồn tại.');</script>";
     }
 }
 
@@ -57,10 +73,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_order_id'])) {
     $order_id = $_POST['delete_order_id'];
 
     // Kiểm tra xem đơn hàng có tồn tại không
-    $check_stmt = $conn->prepare("SELECT OCode FROM orders WHERE OCode = :order_id");
+    $check_stmt = $conn->prepare("SELECT OCode, Status, (TotalPrice - (SELECT COALESCE(SUM(Amount), 0) FROM customer_partialpayments WHERE OCode = orders.OCode)) AS RemainingBalance FROM orders WHERE OCode = :order_id");
     $check_stmt->execute(['order_id' => $order_id]);
+    $order = $check_stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($check_stmt->rowCount() > 0) {
+    if ($order && $order['RemainingBalance'] == 0 && $order['Status'] == 'completed') {
         // Xóa đơn hàng khỏi cơ sở dữ liệu
         $delete_stmt = $conn->prepare("DELETE FROM orders WHERE OCode = :order_id");
         $delete_stmt->execute(['order_id' => $order_id]);
@@ -72,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_order_id'])) {
         // Thông báo thành công và chuyển hướng về trang quản lý đơn hàng
         echo "<script>alert('Đơn hàng đã được xóa thành công.'); window.location.href = 'orders.php';</script>";
     } else {
-        echo "<script>alert('Đơn hàng không tồn tại hoặc đã bị xóa.');</script>";
+        echo "<script>alert('Đơn hàng không thể xóa. Chỉ có thể xóa đơn hàng đã thanh toán đủ và có trạng thái hoàn thành.');</script>";
     }
 }
 
@@ -92,7 +109,7 @@ $sql = "SELECT orders.*,
         FROM orders
         JOIN customer ON orders.CusId = customer.CusId
         JOIN employee ON orders.ECode = employee.ECode
-        WHERE customer.Fname LIKE :query OR customer.Lname LIKE :query AND employee.Role = 'OperationalStaff'
+        WHERE (customer.Fname LIKE :query OR customer.Lname LIKE :query) AND employee.Role = 'OperationalStaff'
         ORDER BY $order_by $order_dir
         LIMIT :limit OFFSET :offset";
 $stmt = $conn->prepare($sql);

@@ -222,7 +222,7 @@ include 'nav.php';
     <div class="search-container">
         <form method="GET" action="product_manager.php">
             <input type="text" name="search" value="<?= htmlspecialchars($search); ?>" placeholder="Nhập mã, tên sản phẩm hoặc tên nhà cung cấp">
-            <button type="submit">Tìm kiếm</button>
+            <button type="submit"><i class="fa fa-search"></i> Tìm kiếm</button>
         </form>
     </div>
     <a href="add_fabric_types.php?CCode=" class="btn-add"><i class="fas fa-plus"></i>Thêm sản phẩm</a>
