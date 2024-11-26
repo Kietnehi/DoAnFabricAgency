@@ -11,7 +11,7 @@ if (isset($_GET['customer_id'])) {
                                FROM customer_partialpayments 
                                WHERE OCode = orders.OCode), TotalPrice) AS RemainingBalance
         FROM orders 
-        WHERE CusId = ? AND Status != 'completed'
+        WHERE CusId = ? AND Status != 'paid'
         ORDER BY OrderTime DESC
     ");
     $stmt->execute([$customerId]);

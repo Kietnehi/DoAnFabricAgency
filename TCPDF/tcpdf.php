@@ -8201,7 +8201,7 @@ class TCPDF {
 
 	/**
 	 * Output annotations objects for all pages.
-	 * !!! THIS METHOD IS NOT YET COMPLETED !!!
+	 * !!! THIS METHOD IS NOT YET paid !!!
 	 * See section 12.5 of PDF 32000_2008 reference.
 	 * @protected
 	 * @author Nicola Asuni
@@ -8470,7 +8470,7 @@ class TCPDF {
 							if ($pl['opt']['statemodel'] == 'Marked') {
 								$states = array('Accepted', 'Unmarked');
 							} else {
-								$states = array('Accepted', 'Rejected', 'Cancelled', 'Completed', 'None');
+								$states = array('Accepted', 'Rejected', 'Cancelled', 'paid', 'None');
 							}
 							if ($hasState AND in_array($pl['opt']['state'], $states)) {
 								$annots .= ' /State /'.$pl['opt']['state'];
@@ -8633,7 +8633,7 @@ class TCPDF {
 							}
 							$filename = basename($pl['opt']['fs']);
 							if (isset($this->embeddedfiles[$filename]['f'])) {
-								// ... TO BE COMPLETED ...
+								// ... TO BE paid ...
 								// /R /C /B /E /CO /CP
 								$annots .= ' /Sound '.$this->embeddedfiles[$filename]['f'].' 0 R';
 								$iconsapp = array('Speaker', 'Mic');
@@ -23286,7 +23286,7 @@ class TCPDF {
 	}
 
 	/**
-	 * Apply the requested SVG styles (*** TO BE COMPLETED ***)
+	 * Apply the requested SVG styles (*** TO BE paid ***)
 	 * @param array $svgstyle array of SVG styles to apply
 	 * @param array $prevsvgstyle array of previous SVG style
 	 * @param int $x X origin of the bounding box
@@ -23967,7 +23967,7 @@ class TCPDF {
 	}
 
 	/**
-	 * Sets the opening SVG element handler function for the XML parser. (*** TO BE COMPLETED ***)
+	 * Sets the opening SVG element handler function for the XML parser. (*** TO BE paid ***)
 	 * @param resource|string $parser The first parameter, parser, is a reference to the XML parser calling the handler.
 	 * @param string $name The second parameter, name, contains the name of the element for which this handler is called. If case-folding is in effect for this parser, the element name will be in uppercase letters.
 	 * @param array $attribs The third parameter, attribs, contains an associative array with the element's attributes (if any). The keys of this array are the attribute names, the values are the attribute values. Attribute names are case-folded on the same criteria as element names. Attribute values are not case-folded. The original order of the attributes can be retrieved by walking through attribs the normal way, using each(). The first key in the array was the first attribute, and so on.

@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay_order_id'])) {
                 UPDATE orders 
                 SET Status = CASE 
                     WHEN (SELECT COALESCE(SUM(Amount), 0) FROM customer_partialpayments WHERE OCode = :order_id) >= TotalPrice 
-                    THEN 'completed' 
+                    THEN 'paid' 
                     ELSE 'partial_payment' 
                 END
                 WHERE OCode = :order_id
@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_order_id'])) {
     $check_stmt->execute(['order_id' => $order_id]);
     $order = $check_stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($order && $order['RemainingBalance'] == 0 && $order['Status'] == 'completed') {
+    if ($order && $order['RemainingBalance'] == 0 && $order['Status'] == 'paid') {
         // Xóa đơn hàng khỏi cơ sở dữ liệu
         $delete_stmt = $conn->prepare("DELETE FROM orders WHERE OCode = :order_id");
         $delete_stmt->execute(['order_id' => $order_id]);
@@ -105,7 +105,7 @@ $offset = ($page - 1) * $limit;
 $sql = "SELECT orders.*, 
                customer.Fname AS customer_fname, customer.Lname AS customer_lname, 
                employee.Fname AS emp_fname, employee.Lname AS emp_lname,
-               COALESCE(orders.TotalPrice - (SELECT SUM(Amount) FROM customer_partialpayments WHERE OCode = orders.OCode), orders.TotalPrice) AS RemainingBalance
+               GREATEST(orders.TotalPrice - (SELECT COALESCE(SUM(Amount), 0) FROM customer_partialpayments WHERE OCode = orders.OCode), 0) AS RemainingBalance
         FROM orders
         JOIN customer ON orders.CusId = customer.CusId
         JOIN employee ON orders.ECode = employee.ECode
@@ -205,6 +205,15 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
         function closeDeleteModal() {
             document.getElementById('deleteOrderModal').style.display = 'none';
         }
+
+        function submitPaymentForm() {
+            var paymentAmount = parseFloat(document.getElementById('payment_amount').value);
+            if (isNaN(paymentAmount) || paymentAmount <= 0) {
+                alert('Số tiền thanh toán phải lớn hơn 0.');
+                return false;
+            }
+            document.getElementById('payment_form').submit();
+        }
     </script>
 </head>
 
@@ -222,6 +231,10 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
         <form method="POST" id="payment_form">
             <input type="hidden" name="pay_order_id" id="pay_order_id">
             <input type="hidden" name="payment_amount" id="payment_amount">
+        </form>
+
+        <form method="POST" id="deleteOrderForm">
+            <input type="hidden" name="delete_order_id" id="delete_order_id">
         </form>
 
         <table>
@@ -253,7 +266,7 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
                         <td class="action-buttons">
                             <a href="edit_order.php?id=<?= $order['OCode']; ?>" class="edit-btn">Sửa</a>
                             <button type="button" onclick="openDeleteModal(<?= $order['OCode']; ?>)" class="delete-btn">Xóa</button>
-                            <?php if ($order['Status'] !== 'completed' && $order['Status'] !== 'cancelled'): ?>
+                            <?php if ($order['Status'] !== 'paid' && $order['Status'] !== 'cancelled'): ?>
                                 <button type="button" onclick="openPaymentModal(<?= $order['OCode']; ?>, <?= $order['RemainingBalance']; ?>)" class="pay-btn">Thanh toán</button>
                             <?php endif; ?>
                         </td>
@@ -277,7 +290,7 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
         <div class="modal-content">
             <span class="close" onclick="closePaymentModal()">&times;</span>
             <h2>Thanh Toán Đơn Hàng</h2>
-            <form id="paymentForm" method="POST">
+            <form id="paymentForm" method="POST" onsubmit="return submitPaymentForm();">
                 <input type="hidden" name="pay_order_id" id="pay_order_id">
                 <label for="payment_amount">Số Tiền Thanh Toán:</label>
                 <input type="number" name="payment_amount" id="payment_amount" step="0.01" required>

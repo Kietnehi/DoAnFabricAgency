@@ -53,40 +53,53 @@ $order_details = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <title>Chi Tiết Đơn Hàng</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Chi Tiết Đơn Hàng #<?= htmlspecialchars($order['OCode']) ?></h1>
-    <p><strong>Khách Hàng:</strong> <?= htmlspecialchars($order['cust_first'] . " " . $order['cust_last']) ?></p>
-    <p><strong>Nhân Viên:</strong> <?= htmlspecialchars($order['emp_first'] . " " . $order['emp_last']) ?></p>
-    <p><strong>Ngày Đặt Hàng:</strong> <?= htmlspecialchars($order['OrderTime']) ?></p>
-    <p><strong>Tổng Tiền:</strong> <?= number_format($order['TotalPrice'], 2) ?> USD</p>
-    <p><strong>Trạng Thái:</strong> <?= htmlspecialchars($order['Status']) ?></p>
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-header">
+                <h1>Chi Tiết Đơn Hàng #<?= htmlspecialchars($order['OCode']) ?></h1>
+            </div>
+            <div class="card-body">
+                <p><strong>Khách Hàng:</strong> <?= htmlspecialchars($order['cust_first'] . " " . $order['cust_last']) ?></p>
+                <p><strong>Nhân Viên:</strong> <?= htmlspecialchars($order['emp_first'] . " " . $order['emp_last']) ?></p>
+                <p><strong>Ngày Đặt Hàng:</strong> <?= htmlspecialchars($order['OrderTime']) ?></p>
+                <p><strong>Tổng Tiền:</strong> <?= number_format($order['TotalPrice'], 2) ?> USD</p>
+                <p><strong>Trạng Thái:</strong> <?= htmlspecialchars($order['Status']) ?></p>
 
-    <h2>Chi Tiết Sản Phẩm</h2>
-    <table border="1" cellpadding="10" cellspacing="0">
-        <thead>
-            <tr>
-                <th>Tên Loại Vải</th>
-                <th>Chiều Dài (m)</th>
-                <th>Số Lượng</th>
-                <th>Đơn Giá (USD)</th>
-                <th>Thành Tiền (USD)</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($order_details as $detail): ?>
-                <tr>
-                    <td><?= htmlspecialchars($detail['fabric_name']) ?></td>
-                    <td><?= htmlspecialchars($detail['fabric_length']) ?></td>
-                    <td><?= htmlspecialchars($detail['Quantity']) ?></td>
-                    <td><?= number_format($detail['UnitPrice'], 2) ?></td>
-                    <td><?= number_format($detail['TotalPrice'], 2) ?></td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+                <h2 class="mt-4">Chi Tiết Sản Phẩm</h2>
+                <table class="table table-striped mt-3">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Tên Loại Vải</th>
+                            <th>Chiều Dài (m)</th>
+                            <th>Số Lượng</th>
+                            <th>Đơn Giá (USD)</th>
+                            <th>Thành Tiền (USD)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($order_details as $detail): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($detail['fabric_name']) ?></td>
+                                <td><?= htmlspecialchars($detail['fabric_length']) ?></td>
+                                <td><?= htmlspecialchars($detail['Quantity']) ?></td>
+                                <td><?= number_format($detail['UnitPrice'], 2) ?></td>
+                                <td><?= number_format($detail['TotalPrice'], 2) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
 
-    <a href="orders.php">Quay Lại Danh Sách Đơn Hàng</a>
+                <a href="orders.php" class="btn btn-primary mt-3"><i class="fa fa-arrow-left" aria-hidden="true"></i> Quay Lại Danh Sách Đơn Hàng</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

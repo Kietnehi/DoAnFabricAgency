@@ -13,7 +13,7 @@ try {
         SELECT DATE_FORMAT(OrderTime, '%Y-%m') AS month, 
                SUM(TotalPrice) AS revenue 
         FROM orders 
-        WHERE Status = 'Completed'
+        WHERE Status = 'paid'
         GROUP BY month
         ORDER BY month ASC
     ")->fetchAll(PDO::FETCH_ASSOC);
@@ -34,7 +34,7 @@ try {
                SUM(orders.TotalPrice) AS revenue 
         FROM orders 
         JOIN customer ON orders.CusId = customer.CusId
-        WHERE orders.Status = 'Completed'
+        WHERE orders.Status = 'paid'
         GROUP BY customer_name
         ORDER BY revenue DESC
     ")->fetchAll(PDO::FETCH_ASSOC);

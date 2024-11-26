@@ -688,7 +688,7 @@
 
 2012-03-10 18:53 +0000 [r2143]  Stevan_White:
 
-	* FreeSans.sfd: Bengali: completed pointwise
+	* FreeSans.sfd: Bengali: paid pointwise
 	  clean-up of auxiliaries. Found a couple more with quite wrong
 	  rignt bounds.
 
@@ -871,7 +871,7 @@
 
 2012-03-04 12:25 +0000 [r2118]  Stevan_White:
 
-	* FreeSerif.sfd: Devanagari Extended: completed
+	* FreeSerif.sfd: Devanagari Extended: paid
 	  range
 
 2012-03-04 11:25 +0000 [r2117]  Stevan_White:
@@ -890,7 +890,7 @@
 
 2012-03-04 10:45 +0000 [r2115]  Stevan_White:
 
-	* FreeSerifBold.sfd: Devanagari: completed main
+	* FreeSerifBold.sfd: Devanagari: paid main
 	  Unicode range.
 
 2012-03-04 10:17 +0000 [r2114]  Stevan_White:
@@ -1099,7 +1099,7 @@
 
 2012-02-21 10:39 +0000 [r2079]  Stevan_White:
 
-	* FreeSerif.sfd: Oriya: completed Unicode range;
+	* FreeSerif.sfd: Oriya: paid Unicode range;
 	  more glyph clean-up. yophola and zophola were exchanged -- fixed.
 	  made look-up for reph+canrabindu.
 
@@ -4181,12 +4181,12 @@
 	  FreeMonoBold.sfd,
 	  FreeMonoOblique.sfd,
 	  FreeMonoBoldOblique.sfd: Combining Diacritical
-	  Marks: completed range
+	  Marks: paid range
 
 2010-10-17 10:16 +0000 [r1588]  Stevan_White:
 
 	* FreeMono.sfd: Combining Diacritical Marks:
-	  completed range
+	  paid range
 
 2010-10-12 21:50 +0000 [r1587]  Stevan_White:
 
@@ -4424,7 +4424,7 @@
 	* FreeSerifItalic.sfd,
 	  FreeSerifBoldItalic.sfd,
 	  FreeSerif.sfd,
-	  FreeSerifBold.sfd: IPA Extensions: Completed
+	  FreeSerifBold.sfd: IPA Extensions: paid
 	  range in bold italic. bold: characters with low right hook, made
 	  not so extreme yhook: made narrower by bending right arm in a
 	  bit. replacement lookups for i with accents and i-ogonek with
@@ -4914,11 +4914,11 @@
 2010-08-09 06:34 +0000 [r1474]  Stevan_White:
 
 	* FreeSerif.sfd: Supplemental Arrows-A:
-	  completed
+	  paid
 
 2010-08-09 05:50 +0000 [r1473]  Stevan_White:
 
-	* FreeSerif.sfd: Arrows: completed
+	* FreeSerif.sfd: Arrows: paid
 
 2010-08-08 22:38 +0000 [r1472]  Stevan_White:
 
@@ -5492,12 +5492,12 @@
 
 2009-12-26 15:40 +0000 [r1399]  Stevan_White:
 
-	* FreeSans.sfd: Tamil: completed digits, added
+	* FreeSans.sfd: Tamil: paid digits, added
 	  some other chars
 
 2009-12-26 14:12 +0000 [r1398]  Stevan_White:
 
-	* FreeSerif.sfd: Malayalam: completed Unicode
+	* FreeSerif.sfd: Malayalam: paid Unicode
 	  range, also moving some Chillu letters from Private Use area to
 	  Unicode, and re-establishing ligatures
 
@@ -5936,7 +5936,7 @@
 	  FreeMonoOblique.sfd,
 	  FreeSerifBold.sfd,
 	  FreeMonoBoldOblique.sfd: Letterlike Symbols:
-	  various additions and adjustments Number Forms: Completed range
+	  various additions and adjustments Number Forms: paid range
 	  in serif roman. Adjusted spacing of Latin numerals in serif
 	  faces. Diacritics for Symbols: various additions Geometric
 	  shapes: thought it best for circle to be round even in oblique
@@ -6061,7 +6061,7 @@
 	  FreeSansBold.sfd,
 	  FreeSansOblique.sfd,
 	  FreeSansBoldOblique.sfd: IPA Extensions:
-	  completed in bold and boldoblique, completing range for face. All
+	  paid in bold and boldoblique, completing range for face. All
 	  faces: deleted 'cvt', 'prep', 'fpgm' TrueType tables, because
 	  FontForge was complaining about them (legacy hinting that could
 	  interfere, possibly lower quality code, etc)
@@ -6075,7 +6075,7 @@
 2009-06-24 22:25 +0000 [r1317]  Stevan_White:
 
 	* FreeSerif.sfd,
-	  FreeSerifBold.sfd: IPA Extensions: completed
+	  FreeSerifBold.sfd: IPA Extensions: paid
 	  range in bold
 
 2009-06-23 21:48 +0000 [r1316]  Stevan_White:
@@ -7410,7 +7410,7 @@
 
 2008-11-23 15:38 +0000 [r1096]  Stevan_White:
 
-	* FreeSerif.sfd: Completed Miscellaneous
+	* FreeSerif.sfd: paid Miscellaneous
 	  Symbols, with some drawings from George Douros' Unicode Symbols,
 	  and some of mine.
 
@@ -7506,7 +7506,7 @@
 
 	* FreeSerifItalic.sfd,
 	  FreeSerifBoldItalic.sfd,
-	  FreeSerifBold.sfd: Completed Hebrew in Bold
+	  FreeSerifBold.sfd: paid Hebrew in Bold
 	  faces.
 
 2008-11-19 00:04 +0000 [r1080]  Stevan_White:
@@ -8176,7 +8176,7 @@
 	* FreeMono.sfd,
 	  FreeMonoBold.sfd,
 	  FreeMonoOblique.sfd,
-	  FreeMonoBoldOblique.sfd: Completed General
+	  FreeMonoBoldOblique.sfd: paid General
 	  Punctuation for Mono faces
 
 2008-10-16 08:08 +0000 [r985]  Stevan_White:
@@ -9035,7 +9035,7 @@
 
 2008-06-19 08:25 +0000 [r866]  Stevan_White:
 
-	* FreeMonoBoldOblique.sfd: Completed fit of Mono
+	* FreeMonoBoldOblique.sfd: paid fit of Mono
 	  to 800 to -200 EM.
 
 2008-06-19 07:47 +0000 [r865]  Stevan_White:
@@ -9188,7 +9188,7 @@
 	  FreeMono.sfd,
 	  FreeMonoBold.sfd,
 	  FreeMonoOblique.sfd,
-	  FreeMonoBoldOblique.sfd: Completed/tweeked
+	  FreeMonoBoldOblique.sfd: paid/tweeked
 	  Number Forms
 
 2008-06-02 22:28 +0000 [r847]  Stevan_White:
@@ -9260,8 +9260,8 @@
 	  FreeSerif.sfd,
 	  FreeSerifBold.sfd: Looking at special symbols.
 	  Drew several Miscellaneous Symbols in Mono and Serif
-	  (Completed/corrected planetary symbols, added Dice, some other
-	  easy ones) Completed Dingbats in Serif (using URW Dingbats) Added
+	  (paid/corrected planetary symbols, added Dice, some other
+	  easy ones) paid Dingbats in Serif (using URW Dingbats) Added
 	  some Block Elements to Serif
 
 2008-05-25 23:47 +0000 [r840]  Stevan_White:
@@ -9560,7 +9560,7 @@
 
 2008-05-11 08:22 +0000 [r795]  Stevan_White:
 
-	* FreeMono.sfd: Completed Spacing Modifier
+	* FreeMono.sfd: paid Spacing Modifier
 	  Letters Added a couple of Greek Punctuation
 
 2008-05-10 22:39 +0000 [r794]  Stevan_White:
@@ -9699,7 +9699,7 @@
 2008-05-03 17:05 +0000 [r771]  Stevan_White:
 
 	* FreeSans.sfd, FreeMono.sfd:
-	  Completed General Punctuation
+	  paid General Punctuation
 
 2008-05-03 15:00 +0000 [r770]  Stevan_White:
 
@@ -9707,7 +9707,7 @@
 
 2008-05-03 14:53 +0000 [r769]  Stevan_White:
 
-	* FreeSans.sfd: Completed IPA Extensions
+	* FreeSans.sfd: paid IPA Extensions
 
 2008-05-03 13:46 +0000 [r768]  Stevan_White:
 
@@ -10133,7 +10133,7 @@
 	* FreeSans.sfd,
 	  FreeSansBold.sfd,
 	  FreeSansOblique.sfd,
-	  FreeSansBoldOblique.sfd: Completed the fix of
+	  FreeSansBoldOblique.sfd: paid the fix of
 	  bug #12798, Greek glyphs with accents to side Much mucking with
 	  accents here, and fixed a few things that were just wrong.
 
@@ -10207,7 +10207,7 @@
 	* FreeMono.sfd,
 	  FreeMonoBold.sfd,
 	  FreeMonoOblique.sfd,
-	  FreeMonoBoldOblique.sfd: Completed
+	  FreeMonoBoldOblique.sfd: paid
 	  re-structuring of stacked Latin accents in Mono. Also: lots of
 	  associated adjustments of Greek Extended accents. (Trying to at
 	  least center extremely wide characters on their box) Repaired
@@ -10461,7 +10461,7 @@
 	  (was referencing E) 0401, 0402, 040c, 040d, 040e 0450, 0451, 0453
 	  more in the later ranges. Deleted dozens of characters in Bold,
 	  Italic, and BoldItalic, that appeared half-made (a part of the
-	  letter was copied, but the letter was never completed, and was
+	  letter was copied, but the letter was never paid, and was
 	  basically wrong) Lots of letters with hooks and lines in italic
 	  were represented as just the unhooked version in italic. 048a,
 	  048b (short i with tail, had big-eared breve common in Cyrillic,
@@ -10891,7 +10891,7 @@
 	  Validation, and in Windows the font not showing up in the font
 	  display. These were all in the range 0x1025f+, which is an
 	  attempt to take care of combining forms in Indic scripts (I don't
-	  know if this work was ever completed, or if it is the best way to
+	  know if this work was ever paid, or if it is the best way to
 	  do this). The names were like uni0916_uni094D.half_uni0928.pres
 	  or longer uni0926_uni094D.half_uni0926_uni094D.half.pres and a
 	  few much longer than this. By a process of removing redundant
@@ -11356,7 +11356,7 @@
 
 2008-03-02 22:50 +0000 [r528]  Stevan_White:
 
-	* FreeMono.sfd: Completed fix of glyph path
+	* FreeMono.sfd: paid fix of glyph path
 	  problems open path intersecting not clockwise missing extrema Had
 	  to remove one glyph, because couldn't figure out how to make it
 	  not intersect itself: dkshade U+2193, a checkerboard (probably
@@ -12031,7 +12031,7 @@
 
 	* ChangeLog, FreeSansBold.sfd: *
 	  FreeSansBold.sfd: added U+0569, U+0571, U+0579, U+057B,
-	  U+0586. Armenian small letters completed.
+	  U+0586. Armenian small letters paid.
 
 2006-01-26 15:44 +0000 [r460]  peterlin:
 
@@ -12926,7 +12926,7 @@
 
 	* ChangeLog, FreeSansBold.sfd:
 	  FreeSansBold.sfd - added subscripts and superscripts
-	  (U+2070-208F), completed fractions (U+2152-215F) and Roman
+	  (U+2070-208F), paid fractions (U+2152-215F) and Roman
 	  numerals (U+2160-217F).
 
 2005-10-27 13:44 +0000 [r331]  peterlin:
@@ -13303,7 +13303,7 @@
 2003-09-12 12:53 +0000 [r277]  peterlin:
 
 	* FreeSans.sfd: Subscript numerals
-	  (U+2080-U+2089) completed.
+	  (U+2080-U+2089) paid.
 
 2003-09-12 12:40 +0000 [r276]  peterlin:
 
@@ -13383,7 +13383,7 @@
 2003-05-15 11:58 +0000 [r262]  peterlin:
 
 	* FreeSansOblique.sfd,
-	  FreeSansBoldOblique.sfd: Completed moving
+	  FreeSansBoldOblique.sfd: paid moving
 	  kerning information from ASCII numerals to kerned numerals in the
 	  Adobe corporate use area (U+F6xx).
 
@@ -13419,7 +13419,7 @@
 2003-05-14 09:57 +0000 [r255]  peterlin:
 
 	* FreeSerif.sfd: Super- and subscript numerals
-	  complete, vulgar fractions completed and redone as references
+	  complete, vulgar fractions paid and redone as references
 	  rather than outlines.
 
 2003-05-12 16:58 +0000 [r253-254]  peterlin:
@@ -14079,7 +14079,7 @@
 2002-04-29 17:35 +0000 [r127]  peterlin:
 
 	* FreeMono.sfd: Added one glyph to the
-	  Geometrical Shapes area, which is now completed; added three
+	  Geometrical Shapes area, which is now paid; added three
 	  glyphs to the Miscellaneous Symbols area.
 
 2002-04-29 10:34 +0000 [r126]  peterlin:
@@ -14102,7 +14102,7 @@
 	* FreeMono.sfd: Minor corrections in the Box
 	  Drawing area.
 
-	* FreeMonoBold.sfd: Box Drawing area completed.
+	* FreeMonoBold.sfd: Box Drawing area paid.
 	  Added some glyphs in the Geometrical Shapes area.
 
 2002-04-24 16:09 +0000 [r120]  peterlin:
@@ -14111,7 +14111,7 @@
 
 2002-04-24 16:06 +0000 [r119]  peterlin:
 
-	* FreeMono.sfd: BoxDrawing area completed.
+	* FreeMono.sfd: BoxDrawing area paid.
 
 2002-04-23 15:22 +0000 [r118]  peterlin:
 
@@ -14319,7 +14319,7 @@
 
 	* FreeMono.sfd,
 	  FreeMonoOblique.sfd: Modern Non-Russian
-	  Cyrillic mostly completed.
+	  Cyrillic mostly paid.
 
 2002-04-05 10:37 +0000 [r78]  peterlin:
 
@@ -14399,7 +14399,7 @@
 
 2002-03-26 16:20 +0000 [r61]  peterlin:
 
-	* FreeMono.sfd: Completed vulgar fractions.
+	* FreeMono.sfd: paid vulgar fractions.
 
 2002-03-26 16:00 +0000 [r60]  peterlin:
 

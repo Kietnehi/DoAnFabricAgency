@@ -151,6 +151,36 @@ ob_end_flush();
             font-size: 12px;
         }
     </style>
+    <script>
+        function checkDebt() {
+            var deptInput = document.getElementById('dept');
+            var alertCheckbox = document.getElementById('alert');
+            var badDebtCheckbox = document.getElementById('bad_debt');
+            if (parseFloat(deptInput.value) > 2000) {
+                alertCheckbox.checked = true;
+                alertCheckbox.disabled = false;
+            } else {
+                alertCheckbox.checked = false;
+                alertCheckbox.disabled = true;
+            }
+        }
+
+        function checkAlertDuration() {
+            var isEligibleBadDebt = <?= json_encode($is_eligible_bad_debt) ?>;
+            var badDebtCheckbox = document.getElementById('bad_debt');
+            if (isEligibleBadDebt) {
+                badDebtCheckbox.checked = true;
+                badDebtCheckbox.disabled = false;
+            } else {
+                badDebtCheckbox.checked = false;
+                badDebtCheckbox.disabled = true;
+            }
+        }
+
+        window.onload = function() {
+            checkAlertDuration();
+        };
+    </script>
 </head>
 <body>
     <div class="container">
@@ -166,7 +196,7 @@ ob_end_flush();
             <input type="text" name="phone" value="<?= htmlspecialchars($customer['Phone']) ?>" required>
 
             <label for="dept">Công Nợ:</label>
-            <input type="number" name="dept" step="0.01" value="<?= htmlspecialchars($customer['Dept']) ?>" required>
+            <input type="number" id="dept" name="dept" step="0.01" value="<?= htmlspecialchars($customer['Dept']) ?>" required oninput="checkDebt()">
 
             <label for="ecode">Nhân Viên Phụ Trách:</label>
             <select name="ecode" required>
