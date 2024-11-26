@@ -9,7 +9,7 @@ if (isset($_GET['customer_id'])) {
         SELECT OCode, TotalPrice, Status, 
         COALESCE(TotalPrice - (SELECT SUM(Amount) FROM customer_partialpayments WHERE OCode = orders.OCode), TotalPrice) AS RemainingBalance
         FROM orders 
-        WHERE CusId = ? AND Status != 'completed'
+        WHERE CusId = ? AND Status != 'paid'
         ORDER BY OrderTime DESC
     ");
     $stmt->execute([$customerId]);

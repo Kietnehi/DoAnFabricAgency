@@ -257,11 +257,11 @@ foreach ($options['fonts'] as $font) {
 }
 
 if ($errors) {
-	echo "--- Process completed with ERRORS!\n\n";
+	echo "--- Process paid with ERRORS!\n\n";
 	exit(4);
 }
 
-echo ">>> Process successfully completed!\n\n";
+echo ">>> Process successfully paid!\n\n";
 exit(0);
 
 //============================================================+

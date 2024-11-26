@@ -9,8 +9,8 @@ include "connect.php"; // Ensure database connection
 include "nav.php";
 
 try {
-    // Calculate total revenue from completed orders
-    $stmt = $conn->prepare("SELECT SUM(TotalPrice) as total_revenue FROM orders WHERE Status = 'Completed'");
+    // Calculate total revenue from paid orders
+    $stmt = $conn->prepare("SELECT SUM(TotalPrice) as total_revenue FROM orders WHERE Status = 'paid'");
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     $totalRevenue = $result['total_revenue'] ?? 0;

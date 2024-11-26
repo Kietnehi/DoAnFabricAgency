@@ -66,7 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         UPDATE orders 
         SET Status = CASE 
             WHEN (SELECT COALESCE(SUM(Amount), 0) FROM customer_partialpayments WHERE OCode = ?) >= TotalPrice 
-            THEN 'completed' 
+            THEN 'paid' 
             ELSE 'partial_payment' 
         END
         WHERE OCode = ?
@@ -194,7 +194,7 @@ $customers = $conn->query("SELECT CusId, Fname, Lname, Dept FROM customer")->fet
                         <td><?= htmlspecialchars($payment['Fname'] . " " . $payment['Lname']); ?></td>
                         <td><?= htmlspecialchars($payment['PaymentTime']); ?></td>
                         <td>$<?= htmlspecialchars(number_format($payment['Amount'], 2)); ?> USD</td>
-                        <td><?= $order_status === 'completed' ? 'Đã Hoàn Thành' : 'Chưa Hoàn Thành'; ?></td>
+                        <td><?= $order_status === 'paid' ? 'Đã Hoàn Thành' : 'Chưa Hoàn Thành'; ?></td>
                         <td>
                             <button class="detail-btn" onclick="window.location.href='customer_orders.php?customer_id=<?= htmlspecialchars($payment['CusId']); ?>'">
                                 <i class="fas fa-info-circle"></i> Xem Chi Tiết

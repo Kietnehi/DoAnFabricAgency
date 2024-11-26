@@ -1,12 +1,9 @@
--- CREATE DATABASE `fabric_new` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
--- use fabric_new;
-
 -- phpMyAdmin SQL Dump
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1:3307
--- Thời gian đã tạo: Th10 26, 2024 lúc 01:00 PM
+-- Thời gian đã tạo: Th10 26, 2024 lúc 02:11 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -101,7 +98,7 @@ INSERT INTO `customer` (`CusId`, `Fname`, `Lname`, `Phone`, `Address`, `Dept`, `
 (1, 'Tom', 'Hanks', '333444555', '123 River St', 10.00, 5),
 (2, 'Emma', 'Stone', '777888999', '456 Mountain Rd', 0.00, 5),
 (3, 'Chris', 'Evans', '111222333', '789 Hill Ln', 20.00, 5),
-(16, 'Quyền', 'Lê', '0362631410', '273 An Dương Vương P3, Q.5', 2900.00, 2);
+(16, 'Quyền', 'Lê', '0362631410', '273 An Dương Vương P3, Q.5', 0.00, 2);
 
 -- --------------------------------------------------------
 
@@ -164,7 +161,8 @@ INSERT INTO `customer_partialpayments` (`CusId`, `Amount`, `PaymentTime`, `OCode
 (1, 41.00, '2024-11-22 03:49:57', NULL, 17),
 (1, 12.00, '2024-11-22 09:56:26', 10, 18),
 (1, 12.00, '2024-11-22 09:57:55', 10, 19),
-(1, 12.00, '2024-11-22 09:57:58', 10, 20);
+(1, 12.00, '2024-11-22 09:57:58', 10, 20),
+(16, 2900.00, '2024-11-26 06:18:33', 15, 25);
 
 -- --------------------------------------------------------
 
@@ -224,7 +222,7 @@ INSERT INTO `orders` (`OCode`, `TotalPrice`, `OrderTime`, `Status`, `HandleTime`
 (8, 90.00, '2024-11-21 20:46:15', 'partial_payment', '2024-11-28 09:15:15', 6, 1, NULL),
 (10, 90.00, '2024-11-22 03:47:41', 'cancelled', '2024-11-22 03:47:41', 6, 1, 'quá tệ '),
 (12, 60.00, '2024-11-22 23:06:00', 'ordered', '2024-11-22 23:06:02', 6, 1, ''),
-(15, 213.00, '2024-11-26 05:51:19', 'new', '2024-11-26 05:51:19', 7, 16, NULL);
+(15, 213.00, '2024-11-26 05:51:19', 'paid', '2024-11-26 05:51:19', 7, 16, NULL);
 
 -- --------------------------------------------------------
 
@@ -436,7 +434,7 @@ ALTER TABLE `customer`
 -- AUTO_INCREMENT cho bảng `customer_partialpayments`
 --
 ALTER TABLE `customer_partialpayments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT cho bảng `employee`
