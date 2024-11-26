@@ -37,11 +37,11 @@ $product_stmt = $conn->prepare("
 $product_stmt->execute([$order_id]);
 $products = $product_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Lấy chi tiết thanh toán của đơn hàng
+// Lấy chi tiết thanh toán của đơn hàng (chỉ lấy thanh toán cho đơn hàng này)
 $payment_stmt = $conn->prepare("
     SELECT PaymentTime AS payment_date, Amount AS amount
     FROM customer_partialpayments
-    WHERE CusId = (SELECT CusId FROM orders WHERE OCode = ?)
+    WHERE OCode = ?  -- Chỉ lấy thanh toán cho đơn hàng này
 ");
 $payment_stmt->execute([$order_id]);
 $payments = $payment_stmt->fetchAll(PDO::FETCH_ASSOC);
