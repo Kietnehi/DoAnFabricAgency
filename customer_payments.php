@@ -216,64 +216,88 @@ $customers = $conn->query("SELECT CusId, Fname, Lname, Dept FROM customer")->fet
         </div>
 
         <h2>Thêm Thanh Toán Mới</h2>
-        <form action="customer_payments.php" method="POST">
-            <label for="customer_id">Khách Hàng:</label>
-            <select name="customer_id" required onchange="fetchOrders(this.value)">
-                <option value="">-- Chọn khách hàng --</option>
-                <?php foreach ($customers as $customer): ?>
-                    <option value="<?= htmlspecialchars($customer['CusId']) ?>">
-                        <?= htmlspecialchars($customer['Fname'] . " " . $customer['Lname']) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
+<form action="customer_payments.php" method="POST" onsubmit="return validatePayment()">
+    <label for="customer_id">Khách Hàng:</label>
+    <select name="customer_id" required onchange="fetchOrders(this.value)">
+        <option value="">-- Chọn khách hàng --</option>
+        <?php foreach ($customers as $customer): ?>
+            <option value="<?= htmlspecialchars($customer['CusId']) ?>">
+                <?= htmlspecialchars($customer['Fname'] . " " . $customer['Lname']) ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
 
-            <label for="order_code">Mã Đơn Hàng:</label>
-            <select name="order_code" id="order_code" required>
-                <option value="">-- Chọn đơn hàng --</option>
-            </select>
+    <label for="order_code">Mã Đơn Hàng:</label>
+    <select name="order_code" id="order_code" required onchange="updateRemainingBalance()">
+        <option value="">-- Chọn đơn hàng --</option>
+    </select>
 
-            <label for="amount">Số Tiền Thanh Toán (USD):</label>
-            <input type="number" name="amount" step="0.01" required id="amount">
+    <label for="amount">Số Tiền Thanh Toán (USD):</label>
+    <input type="number" name="amount" step="0.01" required id="amount">
 
-            <button type="submit">Xác Nhận Thanh Toán</button>
-        </form>
+    <div id="remaining_balance" style="color: red; font-weight: bold;"></div>
 
-        <script>
-            function fetchOrders(customerId) {
-                if (!customerId) {
-                    document.getElementById('order_code').innerHTML = '<option value="">-- Chọn đơn hàng --</option>';
-                    return;
-                }
+    <button type="submit">Xác Nhận Thanh Toán</button>
+</form>
 
-                // Fetch orders of the selected customer
-                fetch('fetch_orders.php?customer_id=' + customerId)
-                    .then(response => response.json())
-                    .then(data => {
-                        const orderCodeSelect = document.getElementById('order_code');
-                        orderCodeSelect.innerHTML = '<option value="">-- Chọn đơn hàng --</option>';
+<script>
+    let selectedRemainingBalance = 0;
 
-                        if (data.length === 0) {
-                            orderCodeSelect.innerHTML = '<option value="">Không có đơn hàng nào</option>';
-                        } else {
-                            data.forEach(order => {
-                                if (order.status === 'cancelled') {
-                                    orderCodeSelect.innerHTML += `<option disabled>
-                                        Order #${order.OCode} - ${order.TotalPrice} USD (Đã Hủy)
-                                    </option>`;
-                                } else {
-                                    orderCodeSelect.innerHTML += `<option value="${order.OCode}">
-                                        Order #${order.OCode} - ${order.TotalPrice} USD
-                                    </option>`;
-                                }
-                            });
-                        }
-                    })
-                    .catch(err => {
-                        console.error('Error fetching orders:', err);
+    function fetchOrders(customerId) {
+        if (!customerId) {
+            document.getElementById('order_code').innerHTML = '<option value="">-- Chọn đơn hàng --</option>';
+            document.getElementById('remaining_balance').innerHTML = '';
+            return;
+        }
+
+        // Fetch orders of the selected customer and display remaining balance
+        fetch('fetch_orders.php?customer_id=' + customerId)
+            .then(response => response.json())
+            .then(data => {
+                const orderCodeSelect = document.getElementById('order_code');
+                orderCodeSelect.innerHTML = '<option value="">-- Chọn đơn hàng --</option>';
+
+                if (data.length === 0) {
+                    orderCodeSelect.innerHTML = '<option value="">Không có đơn hàng nào</option>';
+                    document.getElementById('remaining_balance').innerHTML = '';
+                } else {
+                    data.forEach(order => {
+                        // Add orders to the dropdown
+                        orderCodeSelect.innerHTML += `<option value="${order.OCode}" data-remaining="${order.RemainingBalance}">
+                            Order #${order.OCode} - ${order.TotalPrice} USD
+                        </option>`;
                     });
-            }
-        </script>
-    </div>
-</body>
+                    // Reset remaining balance when new customer is selected
+                    document.getElementById('remaining_balance').innerHTML = '';
+                }
+            })
+            .catch(err => {
+                console.error('Error fetching orders:', err);
+            });
+    }
 
-</html>
+    function updateRemainingBalance() {
+        const orderSelect = document.getElementById('order_code');
+        const selectedOption = orderSelect.options[orderSelect.selectedIndex];
+        if (selectedOption) {
+            // Get the remaining balance from the selected order
+            selectedRemainingBalance = parseFloat(selectedOption.getAttribute('data-remaining'));
+            document.getElementById('remaining_balance').innerHTML = 'Công nợ còn lại: ' + selectedRemainingBalance.toFixed(2) + ' USD';
+        }
+    }
+
+    function validatePayment() {
+        const amount = parseFloat(document.getElementById('amount').value);
+        if (isNaN(amount) || amount <= 0) {
+            alert('Vui lòng nhập số tiền thanh toán hợp lệ.');
+            return false;
+        }
+
+        if (amount > selectedRemainingBalance) {
+            alert('Số tiền thanh toán không được vượt quá công nợ của đơn hàng này.');
+            return false;
+        }
+
+        return true;
+    }
+</script>
