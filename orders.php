@@ -105,7 +105,7 @@ $offset = ($page - 1) * $limit;
 $sql = "SELECT orders.*, 
                customer.Fname AS customer_fname, customer.Lname AS customer_lname, 
                employee.Fname AS emp_fname, employee.Lname AS emp_lname,
-               COALESCE(orders.TotalPrice - (SELECT SUM(Amount) FROM customer_partialpayments WHERE OCode = orders.OCode), orders.TotalPrice) AS RemainingBalance
+               GREATEST(orders.TotalPrice - (SELECT COALESCE(SUM(Amount), 0) FROM customer_partialpayments WHERE OCode = orders.OCode), 0) AS RemainingBalance
         FROM orders
         JOIN customer ON orders.CusId = customer.CusId
         JOIN employee ON orders.ECode = employee.ECode
@@ -222,6 +222,10 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
         <form method="POST" id="payment_form">
             <input type="hidden" name="pay_order_id" id="pay_order_id">
             <input type="hidden" name="payment_amount" id="payment_amount">
+        </form>
+
+        <form method="POST" id="deleteOrderForm">
+            <input type="hidden" name="delete_order_id" id="delete_order_id">
         </form>
 
         <table>

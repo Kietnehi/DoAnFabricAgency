@@ -41,6 +41,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
+    // Lấy số tiền công nợ của khách hàng
+    $debt_stmt = $conn->prepare("SELECT Dept FROM customer WHERE CusId = ?");
+    $debt_stmt->execute([$customer_id]);
+    $debt = $debt_stmt->fetchColumn();
+
+    // Kiểm tra và điều chỉnh số tiền thanh toán nếu vượt quá số tiền công nợ
+    if ($amount > $debt) {
+        $amount = $debt;
+    }
+
     // Thêm thanh toán vào bảng `customer_partialpayments`
     $sql = "INSERT INTO customer_partialpayments (CusId, Amount, PaymentTime, OCode) VALUES (?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
@@ -67,7 +77,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     exit();
 }
 
-
 // Truy vấn SQL với sắp xếp
 $stmt = $conn->prepare("
     SELECT cp.CusId, cp.Amount, cp.PaymentTime, cp.OCode, c.Fname, c.Lname 
@@ -89,7 +98,6 @@ $total_pages = ceil($total_rows / $limit);
 // Lấy danh sách khách hàng và đơn hàng
 $customers = $conn->query("SELECT CusId, Fname, Lname, Dept FROM customer")->fetchAll(PDO::FETCH_ASSOC);
 ?>
-
 
 <!DOCTYPE html>
 <html lang="vi">
