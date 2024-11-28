@@ -4,7 +4,7 @@
 // $db = 'fabric_new';
 
 $host = 'localhost:3306'; // Thay đổi nếu cần
-$db = 'fabric';
+$db = 'fabric_new';
 
 $user = 'root'; // Thay đổi nếu cần
 $password = '';
