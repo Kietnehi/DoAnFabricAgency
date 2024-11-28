@@ -84,33 +84,21 @@ $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
 $sql = "SELECT orders.*, 
-               customer.CusId AS customer_id, 
-               customer.Fname AS customer_fname, 
-               customer.Lname AS customer_lname, 
-               customer.Address AS customer_address, 
-               customer.Phone AS customer_phone,
-               employee.Fname AS emp_fname, 
-               employee.Lname AS emp_lname,
+               customer.Fname AS customer_fname, customer.Lname AS customer_lname, 
+               employee.Fname AS emp_fname, employee.Lname AS emp_lname,
                COALESCE(orders.TotalPrice - (SELECT SUM(Amount) FROM customer_partialpayments WHERE OCode = orders.OCode), orders.TotalPrice) AS RemainingBalance
         FROM orders
         JOIN customer ON orders.CusId = customer.CusId
         JOIN employee ON orders.ECode = employee.ECode
-        WHERE (customer.Fname LIKE :query 
-               OR customer.Lname LIKE :query 
-               OR CONCAT(customer.Fname, ' ', customer.Lname) LIKE :query
-               OR customer.CusId LIKE :query
-               OR customer.Address LIKE :query
-               OR customer.Phone LIKE :query) 
+        WHERE customer.Fname LIKE :query OR customer.Lname LIKE :query
         ORDER BY $order_by $order_dir
         LIMIT :limit OFFSET :offset";
-
 $stmt = $conn->prepare($sql);
 $stmt->bindValue(':query', "%$query%", PDO::PARAM_STR);
 $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
 
 $total_stmt = $conn->prepare("SELECT COUNT(*) FROM orders JOIN customer ON orders.CusId = customer.CusId WHERE customer.Fname LIKE :query OR customer.Lname LIKE :query");
 $total_stmt->execute([':query' => "%$query%"]);
@@ -154,7 +142,6 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
     </script>
 </head>
 <body>
-    
     <div class="container">
         <h1>Danh Sách Đơn Hàng</h1>
 
@@ -171,89 +158,51 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
         </form>
 
         <table>
-    <tr>
-        <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=OCode&order_dir=<?= $new_order_dir ?>">ID Đơn Hàng</a></th>
-        <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=customer_id&order_dir=<?= $new_order_dir ?>">Mã Khách Hàng</a></th>
-        <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=customer_fname&order_dir=<?= $new_order_dir ?>">Khách Hàng</a></th>
-        <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=customer_address&order_dir=<?= $new_order_dir ?>">Địa Chỉ</a></th>
-        <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=customer_phone&order_dir=<?= $new_order_dir ?>">Số Điện Thoại</a></th>
-        <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=emp_fname&order_dir=<?= $new_order_dir ?>">Nhân Viên</a></th>
-        <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=OrderTime&order_dir=<?= $new_order_dir ?>">Ngày Đặt</a></th>
-        <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=TotalPrice&order_dir=<?= $new_order_dir ?>">Tổng Tiền</a></th>
-        <th>Số Tiền Chưa Thanh Toán</th>
-        <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Status&order_dir=<?= $new_order_dir ?>">Trạng Thái</a></th>
-        <th>Hành động</th>
-    </tr>
-    <?php if (!empty($orders)): ?>
-        <?php foreach ($orders as $order): ?>
-        <tr>
-            <td><?= htmlspecialchars($order['OCode']); ?></td>
-            <td><?= htmlspecialchars($order['customer_id']); ?></td>
-            <td><?= htmlspecialchars($order['customer_fname'] . " " . $order['customer_lname']); ?></td>
-            <td><?= htmlspecialchars($order['customer_address']); ?></td> <!-- Hiển thị địa chỉ -->
-            <td><?= htmlspecialchars($order['customer_phone']); ?></td> <!-- Hiển thị số điện thoại -->
-            <td><?= htmlspecialchars($order['emp_fname'] . " " . $order['emp_lname']); ?></td>
-            <td><?= htmlspecialchars($order['OrderTime']); ?></td>
-            <td><?= htmlspecialchars(number_format($order['TotalPrice'], 2)); ?></td>
-            <td><?= htmlspecialchars(number_format($order['RemainingBalance'], 2)); ?></td>
-            <td>
-                <?= $order['Status'] === 'cancelled' 
-                    ? '<span class="status-cancelled">Đã Hủy</span><br>Lý Do: ' . htmlspecialchars($order['Cancellation_Reason']) 
-                    : htmlspecialchars($order['Status']); 
-                ?>
-            </td>
-            <td class="action-buttons">
-                <a href="edit_order.php?id=<?= $order['OCode']; ?>" class="edit-btn">Sửa</a>
-                <button type="button" onclick="openDeleteModal(<?= $order['OCode']; ?>)" class="delete-btn">Xóa</button>
-                <?php if ($order['Status'] !== 'completed' && $order['Status'] !== 'cancelled'): ?>
-                    <button type="button" onclick="openPaymentModal(<?= $order['OCode']; ?>, <?= $order['RemainingBalance']; ?>)" class="pay-btn">Thanh toán</button>
-                <?php endif; ?>
-            </td>
-        </tr>
-        <?php endforeach; ?>
-    <?php else: ?>
-        <tr>
-            <td colspan="10" style="text-align: center;">Không tìm thấy đơn hàng nào.</td>
-        </tr>
-    <?php endif; ?>
-</table>
+            <tr>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=OCode&order_dir=<?= $new_order_dir ?>">ID</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=customer_fname&order_dir=<?= $new_order_dir ?>">Khách Hàng</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=emp_fname&order_dir=<?= $new_order_dir ?>">Nhân Viên</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=OrderTime&order_dir=<?= $new_order_dir ?>">Ngày Đặt</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=TotalPrice&order_dir=<?= $new_order_dir ?>">Tổng Tiền</a></th>
+                <th>Số Tiền Chưa Thanh Toán</th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Status&order_dir=<?= $new_order_dir ?>">Trạng Thái</a></th>
+                <th>Hành động</th>
+            </tr>
+            <?php if (!empty($orders)): ?>
+                <?php foreach ($orders as $order): ?>
+                <tr>
+                    <td><?= $order['OCode']; ?></td>
+                    <td><?= htmlspecialchars($order['customer_fname'] . " " . $order['customer_lname']); ?></td>
+                    <td><?= htmlspecialchars($order['emp_fname'] . " " . $order['emp_lname']); ?></td>
+                    <td><?= htmlspecialchars($order['OrderTime']); ?></td><td><?= htmlspecialchars(number_format($order['TotalPrice'], 2)); ?></td>
+                    <td><?= htmlspecialchars(number_format($order['RemainingBalance'], 2)); ?></td>
+                    <td>
+                        <?= $order['Status'] === 'cancelled' 
+                            ? '<span class="status-cancelled">Đã Hủy</span><br>Lý Do: ' . htmlspecialchars($order['Cancellation_Reason']) 
+                            : htmlspecialchars($order['Status']); 
+                        ?>
+                    </td>
+                    <td class="action-buttons">
+                        <a href="edit_order.php?id=<?= $order['OCode']; ?>" class="edit-btn">Sửa</a>
+                        <button type="button" onclick="openDeleteModal(<?= $order['OCode']; ?>)" class="delete-btn">Xóa</button>
+                        <?php if ($order['Status'] !== 'completed' && $order['Status'] !== 'cancelled'): ?>
+                            <button type="button" onclick="openPaymentModal(<?= $order['OCode']; ?>, <?= $order['RemainingBalance']; ?>)" class="pay-btn">Thanh toán</button>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <tr>
+                    <td colspan="8" style="text-align: center;">Không tìm thấy đơn hàng nào.</td>
+                </tr>
+            <?php endif; ?>
+        </table>
 
-
-
-        
-       <!-- Phân trang -->
-<div class="pagination">
-    <!-- Nút First và Previous -->
-    <a href="?query=<?= htmlspecialchars($query) ?>&order_by=<?= htmlspecialchars($order_by) ?>&order_dir=<?= htmlspecialchars($order_dir) ?>&page=1" class="<?= ($page == 1) ? 'disabled' : '' ?>">&laquo; Đầu</a>
-    <a href="?query=<?= htmlspecialchars($query) ?>&order_by=<?= htmlspecialchars($order_by) ?>&order_dir=<?= htmlspecialchars($order_dir) ?>&page=<?= max(1, $page - 1) ?>" class="<?= ($page == 1) ? 'disabled' : '' ?>">Trước</a>
-
-    <?php
-    // Giới hạn số trang hiển thị (Ví dụ: hiển thị tối đa 5 trang)
-    $max_pages_to_show = 5;
-    $half_max_pages = floor($max_pages_to_show / 2);
-
-    // Tính toán phạm vi trang hiển thị (start_page và end_page)
-    $start_page = max(1, $page - $half_max_pages);
-    $end_page = min($total_pages, $page + $half_max_pages);
-
-    // Điều chỉnh lại phạm vi hiển thị nếu trang đầu hoặc trang cuối bị cắt
-    if ($page - $half_max_pages < 1) {
-        $end_page = min($total_pages, $end_page + (1 - ($page - $half_max_pages)));
-    } elseif ($page + $half_max_pages > $total_pages) {
-        $start_page = max(1, $start_page - ($page + $half_max_pages - $total_pages));
-    }
-
-    // Hiển thị các trang trong phạm vi
-    for ($i = $start_page; $i <= $end_page; $i++):
-    ?>
-        <a href="?query=<?= htmlspecialchars($query) ?>&order_by=<?= htmlspecialchars($order_by) ?>&order_dir=<?= htmlspecialchars($order_dir) ?>&page=<?= $i ?>" class="<?= ($i == $page) ? 'active' : '' ?>"><?= $i ?></a>
-    <?php endfor; ?>
-
-    <!-- Nút Next và Last -->
-    <a href="?query=<?= htmlspecialchars($query) ?>&order_by=<?= htmlspecialchars($order_by) ?>&order_dir=<?= htmlspecialchars($order_dir) ?>&page=<?= min($total_pages, $page + 1) ?>" class="<?= ($page == $total_pages) ? 'disabled' : '' ?>">Tiếp theo</a>
-    <a href="?query=<?= htmlspecialchars($query) ?>&order_by=<?= htmlspecialchars($order_by) ?>&order_dir=<?= htmlspecialchars($order_dir) ?>&page=<?= $total_pages ?>" class="<?= ($page == $total_pages) ? 'disabled' : '' ?>">Cuối &raquo;</a>
-</div>
-
+        <div class="pagination">
+            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                <a href="?query=<?= htmlspecialchars($query) ?>&order_by=<?= htmlspecialchars($order_by) ?>&order_dir=<?= htmlspecialchars($order_dir) ?>&page=<?= $i ?>" class="<?= ($i == $page) ? 'active' : '' ?>"><?= $i ?></a>
+            <?php endfor; ?>
+        </div>
     </div>
 
     <div id="deleteOrderModal" class="modal">
