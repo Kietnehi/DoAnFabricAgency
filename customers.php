@@ -82,41 +82,26 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
         /* Nút sửa (màu xanh lá) */
         .btn-edit {
             background: linear-gradient(to right, #28a745, #218838);
-            /* Gradient xanh lá */
             color: white;
-            /* Màu chữ */
             border: none;
-            /* Không viền */
             padding: 8px 15px;
-            /* Khoảng cách bên trong */
             font-size: 14px;
-            /* Kích thước chữ */
             font-weight: bold;
-            /* Chữ đậm */
             text-decoration: none;
-            /* Bỏ gạch chân */
             border-radius: 5px;
-            /* Bo tròn góc */
             cursor: pointer;
-            /* Hiệu ứng con trỏ */
             transition: all 0.3s ease;
-            /* Hiệu ứng mượt mà */
-            margin-right: 5px;
-            /* Khoảng cách giữa các nút */
         }
 
         /* Hover cho nút sửa */
         .btn-edit:hover {
             background: linear-gradient(to right, #218838, #19692c);
-            /* Gradient đậm hơn */
             transform: scale(1.05);
-            /* Phóng to nhẹ */
         }
 
         /* Nút xóa (màu đỏ) */
         .btn-delete {
             background: linear-gradient(to right, #dc3545, #c82333);
-            /* Gradient đỏ */
             color: white;
             border: none;
             padding: 8px 15px;
@@ -131,8 +116,20 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
         /* Hover cho nút xóa */
         .btn-delete:hover {
             background: linear-gradient(to right, #c82333, #a71d2a);
-            /* Gradient đậm hơn */
             transform: scale(1.05);
+        }
+
+        /* Container cho các nút hành động */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            /* Khoảng cách giữa các nút */
+        }
+
+        /* Nút xóa bị vô hiệu hóa */
+        .btn-delete.disabled {
+            background: #ccc;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -162,7 +159,7 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
                 <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Phone&order_dir=<?= $new_order_dir ?>"><i class="fas fa-sort"></i> Số điện thoại</a></th>
                 <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Dept&order_dir=<?= $new_order_dir ?>"><i class="fas fa-sort"></i> Công nợ</a></th>
                 <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=EmployeeInfo&order_dir=<?= $new_order_dir ?>"><i class="fas fa-sort"></i> Nhân viên phụ trách</a></th>
-                <th>Địa chỉ</th> <!-- Thêm cột Địa chỉ -->
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=EmployeeInfo&order_dir=<?= $new_order_dir ?>"><i class="fas fa-sort"></i>Địa chỉ</a></th>
                 <th>Hành động</th>
             </tr>
             <?php if (!empty($customers)): ?>
@@ -175,12 +172,14 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
                         <td><?= htmlspecialchars($customer['EmployeeInfo'] ?? 'Không xác định'); ?></td>
                         <td><?= htmlspecialchars($customer['Address']); ?></td> <!-- Hiển thị địa chỉ -->
                         <td>
-                            <a href="edit_customer.php?id=<?= $customer['CusId']; ?>" class="btn-edit">Sửa</a>
-                            <?php if ($customer['Dept'] < 1): ?>
-                                <a href="delete_customer.php?id=<?= $customer['CusId']; ?>" class="btn-delete" onclick="return confirm('Bạn có chắc chắn muốn xóa khách hàng này?');">Xóa</a>
-                            <?php else: ?>
-                                <span class="btn-delete disabled" title="Không thể xóa khách hàng có công nợ lớn hơn 1">Xóa</span>
-                            <?php endif; ?>
+                            <div class="action-buttons">
+                                <a href="edit_customer.php?id=<?= $customer['CusId']; ?>" class="btn-edit">Sửa</a>
+                                <?php if ($customer['Dept'] < 1): ?>
+                                    <a href="delete_customer.php?id=<?= $customer['CusId']; ?>" class="btn-delete" onclick="return confirm('Bạn có chắc chắn muốn xóa khách hàng này?');">Xóa</a>
+                                <?php else: ?>
+                                    <span class="btn-delete disabled" title="Không thể xóa khách hàng có công nợ lớn hơn 1">Xóa</span>
+                                <?php endif; ?>
+                            </div>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -191,38 +190,38 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
             <?php endif; ?>
         </table>
 
-       <!-- Phân trang -->
-<div class="pagination">
-    <!-- Nút First và Previous -->
-    <a href="?query=<?= htmlspecialchars($query) ?>&order_by=<?= htmlspecialchars($order_by) ?>&order_dir=<?= htmlspecialchars($order_dir) ?>&page=1" class="<?= ($page == 1) ? 'disabled' : '' ?>">&laquo; Đầu</a>
-    <a href="?query=<?= htmlspecialchars($query) ?>&order_by=<?= htmlspecialchars($order_by) ?>&order_dir=<?= htmlspecialchars($order_dir) ?>&page=<?= max(1, $page - 1) ?>" class="<?= ($page == 1) ? 'disabled' : '' ?>">Trước</a>
+        <!-- Phân trang -->
+        <div class="pagination">
+            <!-- Nút First và Previous -->
+            <a href="?query=<?= htmlspecialchars($query) ?>&order_by=<?= htmlspecialchars($order_by) ?>&order_dir=<?= htmlspecialchars($order_dir) ?>&page=1" class="<?= ($page == 1) ? 'disabled' : '' ?>">&laquo; Đầu</a>
+            <a href="?query=<?= htmlspecialchars($query) ?>&order_by=<?= htmlspecialchars($order_by) ?>&order_dir=<?= htmlspecialchars($order_dir) ?>&page=<?= max(1, $page - 1) ?>" class="<?= ($page == 1) ? 'disabled' : '' ?>">Trước</a>
 
-    <?php
-    // Giới hạn số trang hiển thị (Ví dụ: hiển thị tối đa 5 trang)
-    $max_pages_to_show = 5;
-    $half_max_pages = floor($max_pages_to_show / 2);
+            <?php
+            // Giới hạn số trang hiển thị (Ví dụ: hiển thị tối đa 5 trang)
+            $max_pages_to_show = 5;
+            $half_max_pages = floor($max_pages_to_show / 2);
 
-    // Tính toán phạm vi trang hiển thị (start_page và end_page)
-    $start_page = max(1, $page - $half_max_pages);
-    $end_page = min($total_pages, $page + $half_max_pages);
+            // Tính toán phạm vi trang hiển thị (start_page và end_page)
+            $start_page = max(1, $page - $half_max_pages);
+            $end_page = min($total_pages, $page + $half_max_pages);
 
-    // Điều chỉnh lại phạm vi hiển thị nếu trang đầu hoặc trang cuối bị cắt
-    if ($page - $half_max_pages < 1) {
-        $end_page = min($total_pages, $end_page + (1 - ($page - $half_max_pages)));
-    } elseif ($page + $half_max_pages > $total_pages) {
-        $start_page = max(1, $start_page - ($page + $half_max_pages - $total_pages));
-    }
+            // Điều chỉnh lại phạm vi hiển thị nếu trang đầu hoặc trang cuối bị cắt
+            if ($page - $half_max_pages < 1) {
+                $end_page = min($total_pages, $end_page + (1 - ($page - $half_max_pages)));
+            } elseif ($page + $half_max_pages > $total_pages) {
+                $start_page = max(1, $start_page - ($page + $half_max_pages - $total_pages));
+            }
 
-    // Hiển thị các trang trong phạm vi
-    for ($i = $start_page; $i <= $end_page; $i++):
-    ?>
-        <a href="?query=<?= htmlspecialchars($query) ?>&order_by=<?= htmlspecialchars($order_by) ?>&order_dir=<?= htmlspecialchars($order_dir) ?>&page=<?= $i ?>" class="<?= ($i == $page) ? 'active' : '' ?>"><?= $i ?></a>
-    <?php endfor; ?>
+            // Hiển thị các trang trong phạm vi
+            for ($i = $start_page; $i <= $end_page; $i++):
+            ?>
+                <a href="?query=<?= htmlspecialchars($query) ?>&order_by=<?= htmlspecialchars($order_by) ?>&order_dir=<?= htmlspecialchars($order_dir) ?>&page=<?= $i ?>" class="<?= ($i == $page) ? 'active' : '' ?>"><?= $i ?></a>
+            <?php endfor; ?>
 
-    <!-- Nút Next và Last -->
-    <a href="?query=<?= htmlspecialchars($query) ?>&order_by=<?= htmlspecialchars($order_by) ?>&order_dir=<?= htmlspecialchars($order_dir) ?>&page=<?= min($total_pages, $page + 1) ?>" class="<?= ($page == $total_pages) ? 'disabled' : '' ?>">Tiếp theo</a>
-    <a href="?query=<?= htmlspecialchars($query) ?>&order_by=<?= htmlspecialchars($order_by) ?>&order_dir=<?= htmlspecialchars($order_dir) ?>&page=<?= $total_pages ?>" class="<?= ($page == $total_pages) ? 'disabled' : '' ?>">Cuối &raquo;</a>
-</div>
+            <!-- Nút Next và Last -->
+            <a href="?query=<?= htmlspecialchars($query) ?>&order_by=<?= htmlspecialchars($order_by) ?>&order_dir=<?= htmlspecialchars($order_dir) ?>&page=<?= min($total_pages, $page + 1) ?>" class="<?= ($page == $total_pages) ? 'disabled' : '' ?>">Tiếp theo</a>
+            <a href="?query=<?= htmlspecialchars($query) ?>&order_by=<?= htmlspecialchars($order_by) ?>&order_dir=<?= htmlspecialchars($order_dir) ?>&page=<?= $total_pages ?>" class="<?= ($page == $total_pages) ? 'disabled' : '' ?>">Cuối &raquo;</a>
+        </div>
 
     </div>
 </body>

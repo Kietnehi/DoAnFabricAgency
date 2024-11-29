@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_order_id'])) {
     if ($check_stmt->rowCount() > 0) {
         // Xóa đơn hàng khỏi cơ sở dữ liệu
         $delete_stmt = $conn->prepare("DELETE FROM orders WHERE OCode = :order_id");
-        $delete_stmt->execute(['order_id' => $order_id]);// Xóa tất cả các khoản thanh toán liên quan đến đơn hàng
+        $delete_stmt->execute(['order_id' => $order_id]); // Xóa tất cả các khoản thanh toán liên quan đến đơn hàng
         $delete_payments_stmt = $conn->prepare("DELETE FROM customer_partialpayments WHERE OCode = :order_id");
         $delete_payments_stmt->execute(['order_id' => $order_id]);
 
@@ -110,19 +110,45 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
 
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <title>Quản lý Đơn Hàng</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="orders.css">
     <style>
-        .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
-        .modal-content { background-color: white; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; }
-        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
     </style>
     <script>
         function openPaymentModal(orderId, remainingBalance) {
-            const amount = prompt(`Nhập số tiền thanh toán (tối đa $${remainingBalance.toFixed(2)}):`);if (amount && parseFloat(amount) > 0 && parseFloat(amount) <= remainingBalance) {
+            const amount = prompt(`Nhập số tiền thanh toán (tối đa $${remainingBalance.toFixed(2)}):`);
+            if (amount && parseFloat(amount) > 0 && parseFloat(amount) <= remainingBalance) {
                 document.getElementById('pay_order_id').value = orderId;
                 document.getElementById('payment_amount').value = parseFloat(amount);
                 document.getElementById('payment_form').submit();
@@ -141,6 +167,7 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
         }
     </script>
 </head>
+
 <body>
     <div class="container">
         <h1>Danh Sách Đơn Hàng</h1>
@@ -159,37 +186,38 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
 
         <table>
             <tr>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=OCode&order_dir=<?= $new_order_dir ?>">ID</a></th>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=customer_fname&order_dir=<?= $new_order_dir ?>">Khách Hàng</a></th>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=emp_fname&order_dir=<?= $new_order_dir ?>">Nhân Viên</a></th>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=OrderTime&order_dir=<?= $new_order_dir ?>">Ngày Đặt</a></th>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=TotalPrice&order_dir=<?= $new_order_dir ?>">Tổng Tiền</a></th>
-                <th>Số Tiền Chưa Thanh Toán</th>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Status&order_dir=<?= $new_order_dir ?>">Trạng Thái</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=OCode&order_dir=<?= $new_order_dir ?>"><i class="fas fa-sort"></i> ID</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=customer_fname&order_dir=<?= $new_order_dir ?>"><i class="fas fa-sort"></i> Khách Hàng</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=emp_fname&order_dir=<?= $new_order_dir ?>"><i class="fas fa-sort"></i> Nhân Viên</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=OrderTime&order_dir=<?= $new_order_dir ?>"><i class="fas fa-sort"></i> Ngày Đặt</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=TotalPrice&order_dir=<?= $new_order_dir ?>"><i class="fas fa-sort"></i> Tổng Tiền</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=RemainingBalance&order_dir=<?= $new_order_dir ?>"><i class="fas fa-sort"></i> Số Tiền Chưa Thanh Toán</th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Status&order_dir=<?= $new_order_dir ?>"><i class="fas fa-sort"></i> Trạng Thái</a></th>
                 <th>Hành động</th>
             </tr>
             <?php if (!empty($orders)): ?>
                 <?php foreach ($orders as $order): ?>
-                <tr>
-                    <td><?= $order['OCode']; ?></td>
-                    <td><?= htmlspecialchars($order['customer_fname'] . " " . $order['customer_lname']); ?></td>
-                    <td><?= htmlspecialchars($order['emp_fname'] . " " . $order['emp_lname']); ?></td>
-                    <td><?= htmlspecialchars($order['OrderTime']); ?></td><td><?= htmlspecialchars(number_format($order['TotalPrice'], 2)); ?></td>
-                    <td><?= htmlspecialchars(number_format($order['RemainingBalance'], 2)); ?></td>
-                    <td>
-                        <?= $order['Status'] === 'cancelled' 
-                            ? '<span class="status-cancelled">Đã Hủy</span><br>Lý Do: ' . htmlspecialchars($order['Cancellation_Reason']) 
-                            : htmlspecialchars($order['Status']); 
-                        ?>
-                    </td>
-                    <td class="action-buttons">
-                        <a href="edit_order.php?id=<?= $order['OCode']; ?>" class="edit-btn">Sửa</a>
-                        <button type="button" onclick="openDeleteModal(<?= $order['OCode']; ?>)" class="delete-btn">Xóa</button>
-                        <?php if ($order['Status'] !== 'completed' && $order['Status'] !== 'cancelled'): ?>
-                            <button type="button" onclick="openPaymentModal(<?= $order['OCode']; ?>, <?= $order['RemainingBalance']; ?>)" class="pay-btn">Thanh toán</button>
-                        <?php endif; ?>
-                    </td>
-                </tr>
+                    <tr>
+                        <td><?= $order['OCode']; ?></td>
+                        <td><?= htmlspecialchars($order['customer_fname'] . " " . $order['customer_lname']); ?></td>
+                        <td><?= htmlspecialchars($order['emp_fname'] . " " . $order['emp_lname']); ?></td>
+                        <td><?= htmlspecialchars($order['OrderTime']); ?></td>
+                        <td><?= htmlspecialchars(number_format($order['TotalPrice'], 2)); ?></td>
+                        <td><?= htmlspecialchars(number_format($order['RemainingBalance'], 2)); ?></td>
+                        <td>
+                            <?= $order['Status'] === 'cancelled'
+                                ? '<span class="status-cancelled">Đã Hủy</span><br>Lý Do: ' . htmlspecialchars($order['Cancellation_Reason'])
+                                : htmlspecialchars($order['Status']);
+                            ?>
+                        </td>
+                        <td class="action-buttons">
+                            <a href="edit_order.php?id=<?= $order['OCode']; ?>" class="edit-btn">Sửa</a>
+                            <button type="button" onclick="openDeleteModal(<?= $order['OCode']; ?>)" class="delete-btn">Xóa</button>
+                            <?php if ($order['Status'] !== 'completed' && $order['Status'] !== 'cancelled'): ?>
+                                <button type="button" onclick="openPaymentModal(<?= $order['OCode']; ?>, <?= $order['RemainingBalance']; ?>)" class="pay-btn">Thanh toán</button>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
                 <?php endforeach; ?>
             <?php else: ?>
                 <tr>
@@ -218,4 +246,5 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
         </div>
     </div>
 </body>
+
 </html>

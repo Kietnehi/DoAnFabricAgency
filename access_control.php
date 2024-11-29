@@ -135,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </head>
 <body>
     <div class="container mt-5">
-        <h2>Quản lý Quyền Truy Cập Cơ Sở Dữ Liệu</h2>
+        <h1 style="text-align: center; font-size: 60px; background-color: #f0f8ff; color: #4b0082;">Quản lý Quyền Truy Cập Cơ Sở Dữ Liệu</h1>
 
         <?php if ($message): ?>
             <div class="alert alert-info"><?php echo $message; ?></div>

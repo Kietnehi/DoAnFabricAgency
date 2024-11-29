@@ -66,11 +66,11 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
         <!-- Bảng hiển thị danh sách nhân viên -->
         <table>
             <tr>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=ECode&order_dir=<?= $new_order_dir ?>" class="sortable">ID</a></th>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Fname&order_dir=<?= $new_order_dir ?>" class="sortable">Tên</a></th>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Gender&order_dir=<?= $new_order_dir ?>" class="sortable">Giới tính</a></th>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Role&order_dir=<?= $new_order_dir ?>" class="sortable">Chức vụ</a></th>
-                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Phone&order_dir=<?= $new_order_dir ?>" class="sortable">Số điện thoại</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=ECode&order_dir=<?= $new_order_dir ?>" class="sortable"><i class="fas fa-sort"></i> ID</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Fname&order_dir=<?= $new_order_dir ?>" class="sortable"><i class="fas fa-sort"></i> Tên</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Gender&order_dir=<?= $new_order_dir ?>" class="sortable"><i class="fas fa-sort"></i> Giới tính</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Role&order_dir=<?= $new_order_dir ?>" class="sortable"><i class="fas fa-sort"></i> Chức vụ</a></th>
+                <th><a href="?query=<?= htmlspecialchars($query) ?>&order_by=Phone&order_dir=<?= $new_order_dir ?>" class="sortable"><i class="fas fa-sort"></i> Số điện thoại</a></th>
                 <th>Hành động</th>
             </tr>
             <?php if (!empty($employees)): ?>
