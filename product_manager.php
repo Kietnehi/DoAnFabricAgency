@@ -17,7 +17,8 @@ $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 // Lấy tổng số sản phẩm (có hoặc không có tìm kiếm)
 $totalProductsStmt = $conn->prepare("SELECT COUNT(*) FROM category c 
                                      LEFT JOIN supplier s ON c.SCode = s.SCode 
-                                     WHERE c.Name LIKE :search OR c.CCode LIKE :search OR s.Name LIKE :search");
+                                     WHERE c.Name LIKE :search OR c.CCode LIKE :search 
+                                     OR s.Name LIKE :search OR s.Phone LIKE :search");
 $totalProductsStmt->execute([':search' => "%$search%"]);
 $totalProducts = $totalProductsStmt->fetchColumn();
 
@@ -30,7 +31,8 @@ $sql = "SELECT
             s.SCode, s.Name AS SupplierName, s.Address, s.Phone, s.BankAccount, s.TaxCode 
         FROM category c 
         LEFT JOIN supplier s ON c.SCode = s.SCode
-        WHERE c.Name LIKE :search OR c.CCode LIKE :search OR s.Name LIKE :search
+        WHERE c.Name LIKE :search OR c.CCode LIKE :search 
+        OR s.Name LIKE :search OR s.Phone LIKE :search
         LIMIT :offset, :productsPerPage";
 $stmt = $conn->prepare($sql);
 $stmt->bindValue(':search', "%$search%", PDO::PARAM_STR);
@@ -38,6 +40,7 @@ $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->bindValue(':productsPerPage', $productsPerPage, PDO::PARAM_INT);
 $stmt->execute();
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 // Hàm xóa sản phẩm
 if (isset($_GET['delete'])) {
