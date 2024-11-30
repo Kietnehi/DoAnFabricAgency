@@ -730,7 +730,6 @@ INSERT INTO `customer` (`CusId`, `Fname`, `Lname`, `Phone`, `Address`, `Dept`, `
 (633, 'OIaSSmoZ', 'dqzpJ', '03442791762', 'Street 118, City 78', 1144.00, 5),
 (634, 'TFNyDn', 'EyIApSdab', '03141871756', 'Street 275, City 21', 3782.00, 5),
 (635, 'cQFFtzBya', 'PVdxcmk', '03147487489', 'Street 166, City 28', 283.00, 2);
-INSERT INTO `customer` (`CusId`, `Fname`, `Lname`, `Phone`, `Address`, `Dept`, `ECode`) VALUES
 (636, 'zjQcqs', 'fzLQiWHiLZ', '03754504684', 'Street 236, City 7', 1111.00, 2),
 (637, 'YvKdUnA', 'GfvRsTV', '03106686502', 'Street 116, City 81', 557.00, 2),
 (638, 'pnyPm', 'erBuyw', '03804799889', 'Street 231, City 5', 3357.00, 5),

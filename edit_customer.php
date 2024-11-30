@@ -156,12 +156,22 @@ ob_end_flush();
             var deptInput = document.getElementById('dept');
             var alertCheckbox = document.getElementById('alert');
             var badDebtCheckbox = document.getElementById('bad_debt');
+            var isEligibleBadDebt = <?= json_encode($is_eligible_bad_debt) ?>;
+
             if (parseFloat(deptInput.value) > 2000) {
                 alertCheckbox.checked = true;
                 alertCheckbox.disabled = false;
             } else {
                 alertCheckbox.checked = false;
                 alertCheckbox.disabled = true;
+            }
+
+            if (alertCheckbox.checked && isEligibleBadDebt) {
+                badDebtCheckbox.checked = true;
+                badDebtCheckbox.disabled = false;
+            } else {
+                badDebtCheckbox.checked = false;
+                badDebtCheckbox.disabled = true;
             }
         }
 
@@ -179,6 +189,7 @@ ob_end_flush();
 
         window.onload = function() {
             checkAlertDuration();
+            checkDebt(); // Kiểm tra công nợ khi tải trang
         };
     </script>
 </head>
@@ -242,7 +253,7 @@ ob_end_flush();
 
             <button type="submit">Lưu Thay Đổi</button>
         </form>
-        <a href="customers.php">Quay lại Danh Sách Khách Hàng</a>
+        <a href="customers.php" style="color: #fff;">Quay lại Danh Sách Khách Hàng</a>
     </div>
 </body>
 </html>

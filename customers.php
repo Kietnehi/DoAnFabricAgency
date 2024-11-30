@@ -22,18 +22,6 @@ $offset = ($page - 1) * $limit;
 $start_time = microtime(true);
 
 // Chuẩn bị câu truy vấn SQL cho tìm kiếm, sắp xếp, và liên kết bảng
-// $sql = "SELECT c.CusId, c.Fname, c.Lname, c.Phone, c.Address, c.Dept, c.ECode,
-//         CONCAT('NV ', e.ECode, ' - ', e.Fname, ' ', e.Lname) AS EmployeeInfo
-//         FROM customer c
-//         LEFT JOIN employee e ON c.ECode = e.ECode   
-//         WHERE (CONCAT(c.Fname, ' ', c.Lname) LIKE :query 
-//         OR c.Fname LIKE :query 
-//         OR c.Lname LIKE :query 
-//         OR c.Phone LIKE :query 
-//         OR c.Address LIKE :query)
-//         AND e.Role = 'OfficeStaff'
-//         ORDER BY $order_by $order_dir
-//         LIMIT :limit OFFSET :offset";
 $sql = "SELECT c.CusId, c.Fname, c.Lname, c.Phone, c.Address, c.Dept, c.ECode,
 CONCAT('NV ', e.ECode, ' - ', e.Fname, ' ', e.Lname) AS EmployeeInfo
 FROM customer c
@@ -225,5 +213,4 @@ $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
 
     </div>
 </body>
-
 </html>
