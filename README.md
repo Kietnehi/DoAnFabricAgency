@@ -15,6 +15,9 @@
 ### Tài khoản Admin
 - Username: Admin
 - Password: admin
+### Mô hình thực thể kết hợp 
+![image](https://github.com/user-attachments/assets/19721e01-4893-48d2-bee5-487debfcdfae)
+
 
 ### Giao diện
  ![Giao diện đăng nhập](img/webpages/login.png)
